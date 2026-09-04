@@ -27,7 +27,7 @@ export function BrandPage() {
 
   const products =
     productsQuery.data?.pages.flatMap(
-      (page) => page.products,
+      (page) => page.data.products,
     ) ?? [];
 
   const productCards = mapProductsToCards(products);

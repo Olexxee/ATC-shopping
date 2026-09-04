@@ -6,8 +6,6 @@ interface ProductVariantFormProps {
   errors?: Record<string, string>;
   onSkuChange?: () => void;
   onRemove?: () => void;
-
-  // 👇 NEW: all uploaded images (global) for selecting per variant
   allImages: File[];
 }
 
@@ -36,7 +34,6 @@ export function ProductVariantForm({
   };
 
   // Pre‑compute preview URLs (clean up on unmount would be ideal, but we keep it simple)
-  const imagePreviews = allImages.map((file) => URL.createObjectURL(file));
 
   return (
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">

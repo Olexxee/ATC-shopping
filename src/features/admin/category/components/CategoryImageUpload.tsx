@@ -1,5 +1,3 @@
-// src/features/admin/categories/components/CategoryImageUpload.tsx
-
 import { useRef, useState, useEffect } from "react";
 import { ImagePlus, X, Loader2 } from "lucide-react";
 import imageCompression from "browser-image-compression";
@@ -12,7 +10,6 @@ interface CategoryImageUploadProps {
 }
 
 export function CategoryImageUpload({
-  value,
   onChange,
   previewUrl: initialPreview,
   alt = "Category image",
