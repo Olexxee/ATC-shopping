@@ -14,6 +14,12 @@ import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import { AdminProductsPage } from "./pages/admin/AdminProductsPage";
 import { AdminCreateProductPage } from "./pages/admin/AdminCreateProductPage";
+import { AdminEditCategoryPage } from "./pages/admin/AdminEditCategoryPage";
+import { AdminCreateCategoryPage } from "./pages/admin/AdminCreateCategoryPage";
+import { AdminCreateBrandPage } from "./pages/admin/AdminCreateBrandPage";
+import { AdminEditBrandPage } from "./pages/admin/AdminEditBrandPage";
+import { AdminCategoriesPage } from "./pages/admin/AdminCategoriesPage";
+import { AdminBrandsPage } from "./pages/admin/AdminBrandsPage";
 
 import { AdminRoute } from "./routes/AdminRoute";
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -63,6 +69,14 @@ export function AppRoutes() {
           {/* Create product */}
           <Route path="products/new" element={<AdminCreateProductPage />} />
 
+          <Route path="categories" element={<AdminCategoriesPage />} />
+
+          <Route path="categories/new" element={<AdminCreateCategoryPage />} />
+          <Route
+            path="categories/:id/edit"
+            element={<AdminEditCategoryPage />}
+          />
+
           {/* Edit product */}
           <Route
             path="products/:id/edit"
@@ -85,10 +99,13 @@ export function AppRoutes() {
             element={<AdminComingSoonPage title="Categories" />}
           />
 
+          <Route path="/admin/brands/new" element={<AdminCreateBrandPage />} />
+
           <Route
-            path="brands"
-            element={<AdminComingSoonPage title="Brands" />}
+            path="/admin/brands/:id/edit"
+            element={<AdminEditBrandPage />}
           />
+          <Route path="brands" element={<AdminBrandsPage />} />
 
           <Route
             path="collections"

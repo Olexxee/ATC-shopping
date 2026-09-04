@@ -3,7 +3,6 @@ import {
   type ComponentProps,
   type ReactNode,
 } from "react";
-
 import {
   defaultProductFormValues,
   generateSkuFromName,
@@ -11,7 +10,6 @@ import {
   type ProductFormValues,
   type ProductVariantFormValues,
 } from "../adminProducts.types";
-
 import { useCreateProduct } from "../useCreateProduct";
 
 import {

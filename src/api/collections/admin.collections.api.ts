@@ -1,4 +1,3 @@
-// admin/admin.collections.api.ts
 import { api } from "../../lib/api";
 import type { Collection } from "../../types/collection.types";
 

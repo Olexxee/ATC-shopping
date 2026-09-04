@@ -3,11 +3,8 @@ import { getBrands, getCategories, getCollections } from "./adminCatalog.api";
 
 export const productOrganizationKeys = {
   all: ["product-organization"] as const,
-
   brands: () => [...productOrganizationKeys.all, "brands"] as const,
-
   categories: () => [...productOrganizationKeys.all, "categories"] as const,
-
   collections: () => [...productOrganizationKeys.all, "collections"] as const,
 };
 

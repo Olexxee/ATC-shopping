@@ -1,4 +1,3 @@
-// admin/admin.brands.api.ts
 import { api } from "../../lib/api";
 import type { Brand } from "../../types/brand.types";
 
