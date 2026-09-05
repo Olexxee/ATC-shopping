@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import {Route, Routes } from "react-router-dom";
 
 // Storefront
 import { HomePage } from "./pages/home/HomePage";
