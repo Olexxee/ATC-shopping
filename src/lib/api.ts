@@ -1,6 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
-
 import { queryClient } from "./queryClient";
+import { authKeys } from "../features/auth/auth.keys";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
@@ -30,7 +30,12 @@ const processQueue = (error?: unknown) => {
   failedQueue = [];
 };
 
-const EXCLUDED_ROUTES = ["/auth/login", "/auth/register", "/auth/refresh"];
+const EXCLUDED_ROUTES = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh",
+  "/auth/me",
+];
 
 api.interceptors.response.use(
   (response) => response,
@@ -72,19 +77,16 @@ api.interceptors.response.use(
 
     try {
       await api.post("/api/auth/refresh");
-
       processQueue();
-
       return api(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError);
 
-      // collapse auth state naturally
-      queryClient.setQueryData(["auth", "me"], null);
+      queryClient.setQueryData(authKeys.me(), null);
 
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
     }
-  },
+  }
 );

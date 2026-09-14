@@ -1,4 +1,8 @@
-import {Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+
+// Auth
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
 
 // Storefront
 import { HomePage } from "./pages/home/HomePage";
@@ -8,6 +12,7 @@ import { BrandsPage } from "./pages/brands/BrandsPage";
 import { BrandPage } from "./pages/brands/BrandPage";
 import { CategoriesPage } from "./pages/categories/CategoriesPage";
 import { CategoryPage } from "./pages/categories/CategoryPage";
+import CartPage from "./pages/Cart/CartPage";
 
 // Admin
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
@@ -23,10 +28,28 @@ import { AdminBrandsPage } from "./pages/admin/AdminBrandsPage";
 
 import { AdminRoute } from "./routes/AdminRoute";
 import { AdminLayout } from "./components/admin/AdminLayout";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 export function AppRoutes() {
   return (
     <Routes>
+      {/* ================================================================
+          AUTH
+      ================================================================ */}
+
+      <Route path="/auth">
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
+      </Route>
+
+      {/* ================================================================
+          PROTECTED STOREFRONT
+      ================================================================ */}
+
+      <Route element={<ProtectedRoute />}>
+        <Route path="/cart" element={<CartPage />} />
+      </Route>
+
       {/* ================================================================
           STOREFRONT
       ================================================================ */}
@@ -57,52 +80,25 @@ export function AppRoutes() {
 
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
-
-          {/* Dashboard */}
           <Route path="dashboard" element={<AdminDashboardPage />} />
 
-          {/* Products */}
           <Route path="products" element={<AdminProductsPage />} />
 
-          {/* Create product */}
           <Route path="products/new" element={<AdminCreateProductPage />} />
 
           <Route path="categories" element={<AdminCategoriesPage />} />
 
           <Route path="categories/new" element={<AdminCreateCategoryPage />} />
+
           <Route
             path="categories/:id/edit"
             element={<AdminEditCategoryPage />}
           />
 
-          {/* Edit product */}
-          <Route
-            path="products/:id/edit"
-            element={
-              <div className="p-6">
-                <h1 className="text-xl font-semibold text-slate-900">
-                  Edit product
-                </h1>
+          <Route path="brands/new" element={<AdminCreateBrandPage />} />
 
-                <p className="mt-2 text-sm text-slate-500">
-                  Product editing will be implemented next.
-                </p>
-              </div>
-            }
-          />
+          <Route path="brands/:id/edit" element={<AdminEditBrandPage />} />
 
-          {/* Future admin modules */}
-          <Route
-            path="categories"
-            element={<AdminComingSoonPage title="Categories" />}
-          />
-
-          <Route path="/admin/brands/new" element={<AdminCreateBrandPage />} />
-
-          <Route
-            path="/admin/brands/:id/edit"
-            element={<AdminEditBrandPage />}
-          />
           <Route path="brands" element={<AdminBrandsPage />} />
 
           <Route

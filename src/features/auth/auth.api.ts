@@ -1,38 +1,45 @@
 import { api } from "../../lib/api";
+import type {
+  AuthResponse,
+  LoginPayload,
+  RegisterPayload,
+  UpdateMePayload,
+  User,
+} from "../../features/auth/auth.types";
 
-export interface AuthUser {
-  id: string;
-  fullName: string;
-  email: string;
-  phone?: string | null;
-  role?: string;
-  status?: string;
-}
 
-export interface LoginPayload {
-  email: string;
-  password: string;
-}
+export const login = async (payload: LoginPayload): Promise<AuthResponse> => {
+  const response = await api.post("/api/auth/login", payload);
 
-export interface LoginResponse {
-  user: AuthUser;
-  accessToken?: string;
-  refreshToken?: string;
-}
-
-export const login = async (
-  payload: LoginPayload,
-): Promise<LoginResponse> => {
-  const response = await api.post("/auth/login", payload);
   return response.data.data;
 };
 
-export const getMe = async (): Promise<AuthUser> => {
-  const response = await api.get("/auth/me");
+export const register = async (
+  payload: RegisterPayload,
+): Promise<AuthResponse> => {
+  const response = await api.post("/api/auth/register", payload);
+
   return response.data.data;
 };
 
 export const logout = async (): Promise<void> => {
-  await api.post("/auth/logout");
+  await api.post("/api/auth/logout");
 };
 
+export const refreshSession = async (): Promise<AuthResponse> => {
+  const response = await api.post("/api/auth/refresh");
+
+  return response.data.data;
+};
+
+export const getMe = async (): Promise<User> => {
+  const response = await api.get("/api/auth/me");
+
+  return response.data.data;
+};
+
+export const updateMe = async (payload: UpdateMePayload): Promise<User> => {
+  const response = await api.patch("/api/auth/me", payload);
+
+  return response.data.data;
+};

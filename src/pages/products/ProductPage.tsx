@@ -1,29 +1,37 @@
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Minus, Plus, Truck } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Minus,
+  Plus,
+  Truck,
+} from "lucide-react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ProductGrid } from "../../components/product/ProductGrid";
 import { ProductGridSkeleton } from "../../components/product/ProductGridSkeleton";
-
+import { useAddCartItem } from "../../features/cart/cart.mutations";
+import { useCurrentUser } from "../../features/auth/auth.queries";
 import {
   useProductBySlug,
   useRelatedProducts,
 } from "../../features/products/products.queries";
-
 import {
   getProductCompareAtPrice,
   getProductImage,
   getProductPrice,
   mapProductsToCards,
 } from "../../mappers/product.mapper";
-
 import type { ProductVariant } from "../../types/product.types";
+
+
 
 export function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
 
   const productQuery = useProductBySlug(slug ?? "");
-
   const product = productQuery.data;
+
+  const addCartItemMutation = useAddCartItem();
 
   const relatedQuery = useRelatedProducts(product?.id ?? "", 4);
 
@@ -45,6 +53,7 @@ export function ProductPage() {
       product={product}
       relatedProducts={relatedProducts}
       relatedLoading={relatedQuery.isLoading}
+      addCartItemMutation={addCartItemMutation}
     />
   );
 }
@@ -53,25 +62,40 @@ interface ProductDetailProps {
   product: NonNullable<ReturnType<typeof useProductBySlug>["data"]>;
   relatedProducts: ReturnType<typeof mapProductsToCards>;
   relatedLoading: boolean;
+  addCartItemMutation: ReturnType<typeof useAddCartItem>;
 }
 
 function ProductDetail({
   product,
   relatedProducts,
   relatedLoading,
+  addCartItemMutation,
 }: ProductDetailProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { data: user, isLoading: isAuthLoading } = useCurrentUser();
+
   const variants = product.variants ?? [];
 
-  const allImages = useMemo(() => {
-    return variants.flatMap((variant) =>
-      (variant.media ?? []).map((media) => ({
-        id: media.id,
-        url: media.url,
-        alt: media.alt ?? product.name,
-        variantId: variant.id,
-      })),
-    );
-  }, [variants, product.name]);
+  /*
+   * ------------------------------------------------------------
+   * Gallery
+   * ------------------------------------------------------------
+   */
+
+  const allImages = useMemo(
+    () =>
+      variants.flatMap((variant) =>
+        (variant.media ?? []).map((media) => ({
+          id: media.id,
+          url: media.url,
+          alt: media.alt ?? product.name,
+          variantId: variant.id,
+        })),
+      ),
+    [variants, product.name],
+  );
 
   const fallbackImage = getProductImage(product);
 
@@ -91,8 +115,18 @@ function ProductDetail({
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+  const currentImage = galleryImages[selectedImageIndex];
+
+  /*
+   * ------------------------------------------------------------
+   * Variant selection
+   * ------------------------------------------------------------
+   */
+
   const initialVariant =
-    variants.find((variant) => variant.stock > 0) ?? variants[0];
+    variants.find(
+      (variant) => variant.isActive && variant.stock > 0,
+    ) ?? variants[0];
 
   const [selectedVariantId, setSelectedVariantId] = useState<
     string | undefined
@@ -103,20 +137,6 @@ function ProductDetail({
     initialVariant;
 
   const [quantity, setQuantity] = useState(1);
-
-  const price = selectedVariant
-    ? Number(selectedVariant.price)
-    : getProductPrice(product);
-
-  const compareAtPrice = selectedVariant?.compareAtPrice
-    ? Number(selectedVariant.compareAtPrice)
-    : getProductCompareAtPrice(product);
-
-  const hasDiscount = compareAtPrice !== undefined && compareAtPrice > price;
-
-  const discountPercentage = hasDiscount
-    ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
-    : 0;
 
   const colors = [
     ...new Set(
@@ -144,27 +164,36 @@ function ProductDetail({
     color: string | null,
     size: string | null,
   ) => {
-    const matchingVariant = variants.find((variant) => {
-      const colorMatches = color === null || variant.color === color;
+    const matchingVariants = variants.filter((variant) => {
+      const colorMatches =
+        color === null || variant.color === color;
 
-      const sizeMatches = size === null || variant.size === size;
+      const sizeMatches =
+        size === null || variant.size === size;
 
       return colorMatches && sizeMatches;
     });
 
-    if (matchingVariant) {
-      setSelectedVariantId(matchingVariant.id);
-
-      const imageIndex = galleryImages.findIndex(
-        (image) => image.variantId === matchingVariant.id,
-      );
-
-      if (imageIndex >= 0) {
-        setSelectedImageIndex(imageIndex);
-      }
-
-      setQuantity(1);
+    if (!matchingVariants.length) {
+      return;
     }
+
+    const matchingVariant =
+      matchingVariants.find(
+        (variant) => variant.isActive && variant.stock > 0,
+      ) ?? matchingVariants[0];
+
+    setSelectedVariantId(matchingVariant.id);
+
+    const imageIndex = galleryImages.findIndex(
+      (image) => image.variantId === matchingVariant.id,
+    );
+
+    if (imageIndex >= 0) {
+      setSelectedImageIndex(imageIndex);
+    }
+
+    setQuantity(1);
   };
 
   const handleColorChange = (color: string) => {
@@ -175,15 +204,91 @@ function ProductDetail({
     selectVariantByAttributes(selectedColor, size);
   };
 
+  /*
+   * ------------------------------------------------------------
+   * Pricing
+   * ------------------------------------------------------------
+   */
+
+  const price = selectedVariant
+    ? Number(selectedVariant.price)
+    : getProductPrice(product);
+
+  const compareAtPrice = selectedVariant?.compareAtPrice
+    ? Number(selectedVariant.compareAtPrice)
+    : getProductCompareAtPrice(product);
+
+  const hasDiscount =
+    compareAtPrice !== undefined && compareAtPrice > price;
+
+  const discountPercentage = hasDiscount
+    ? Math.round(
+        ((compareAtPrice - price) / compareAtPrice) * 100,
+      )
+    : 0;
+
+  /*
+   * ------------------------------------------------------------
+   * Cart
+   * ------------------------------------------------------------
+   */
+
   const canIncreaseQuantity =
-    selectedVariant?.stock !== undefined && quantity < selectedVariant.stock;
+    Boolean(selectedVariant?.isActive) &&
+    Boolean(selectedVariant?.stock > quantity);
 
-  const canAddToCart = Boolean(selectedVariant) && selectedVariant.stock > 0;
+  const canAddToCart = Boolean(
+    selectedVariant &&
+      selectedVariant.isActive &&
+      selectedVariant.stock > 0,
+  );
 
-  const currentImage = galleryImages[selectedImageIndex];
+  const handleAddToCart = () => {
+    if (
+      !selectedVariant ||
+      !selectedVariant.isActive ||
+      selectedVariant.stock <= 0
+    ) {
+      return;
+    }
+
+    // Pre-flight auth check: adding to cart requires a session on this
+    // backend. Checking here — instead of firing the mutation and reacting
+    // to the inevitable 401 — avoids two wasted round trips (the add-item
+    // call and the doomed refresh attempt behind it) and, unlike a global
+    // redirect-on-401 in the API interceptor, only redirects when the user
+    // takes an action that actually requires auth. A blanket redirect in
+    // the interceptor would also fire for unrelated background calls (e.g.
+    // a wishlist-status check) and bounce anonymous browsers off this page
+    // for no reason.
+    if (!user) {
+      navigate("/auth/login", {
+        state: {
+          from: {
+            pathname: location.pathname,
+            search: location.search,
+          },
+        },
+      });
+      return;
+    }
+
+    addCartItemMutation.mutate({
+      variantId: selectedVariant.id,
+      quantity,
+    });
+  };
+
+  /*
+   * ------------------------------------------------------------
+   * Gallery navigation
+   * ------------------------------------------------------------
+   */
 
   const goToPreviousImage = () => {
-    if (!galleryImages.length) return;
+    if (!galleryImages.length) {
+      return;
+    }
 
     setSelectedImageIndex((current) =>
       current === 0 ? galleryImages.length - 1 : current - 1,
@@ -191,7 +296,9 @@ function ProductDetail({
   };
 
   const goToNextImage = () => {
-    if (!galleryImages.length) return;
+    if (!galleryImages.length) {
+      return;
+    }
 
     setSelectedImageIndex((current) =>
       current === galleryImages.length - 1 ? 0 : current + 1,
@@ -215,7 +322,10 @@ function ProductDetail({
 
             {product.category && (
               <>
-                <li aria-hidden="true" className="text-neutral-300">
+                <li
+                  aria-hidden="true"
+                  className="text-neutral-300"
+                >
                   /
                 </li>
 
@@ -230,19 +340,22 @@ function ProductDetail({
               </>
             )}
 
-            <li aria-hidden="true" className="text-neutral-300">
+            <li
+              aria-hidden="true"
+              className="text-neutral-300"
+            >
               /
             </li>
 
-            <li className="truncate text-neutral-900">{product.name}</li>
+            <li className="truncate text-neutral-900">
+              {product.name}
+            </li>
           </ol>
         </nav>
 
         {/* Main Product */}
         <section className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)] lg:gap-16 xl:gap-20">
-          {/* =========================
-              PRODUCT GALLERY
-          ========================= */}
+          {/* Product Gallery */}
           <div className="min-w-0">
             <div className="flex flex-col gap-4 sm:flex-row">
               {/* Thumbnails */}
@@ -252,19 +365,14 @@ function ProductDetail({
                     <button
                       key={galleryImage.id}
                       type="button"
-                      onClick={() => setSelectedImageIndex(index)}
+                      onClick={() =>
+                        setSelectedImageIndex(index)
+                      }
                       aria-label={`View product image ${index + 1}`}
                       className={`
-                        relative
-                        aspect-square
-                        w-16
-                        shrink-0
-                        overflow-hidden
-                        rounded-xl
-                        border
-                        bg-neutral-100
-                        transition
-                        sm:w-20
+                        relative aspect-square w-16 shrink-0
+                        overflow-hidden rounded-xl border bg-neutral-100
+                        transition sm:w-20
                         ${
                           selectedImageIndex === index
                             ? "border-neutral-950"
@@ -299,7 +407,7 @@ function ProductDetail({
                     </div>
                   )}
 
-                  {/* Image navigation */}
+                  {/* Image Navigation */}
                   {galleryImages.length > 1 && (
                     <>
                       <button
@@ -307,24 +415,11 @@ function ProductDetail({
                         onClick={goToPreviousImage}
                         aria-label="Previous image"
                         className="
-                          absolute
-                          left-4
-                          top-1/2
-                          flex
-                          h-10
-                          w-10
-                          -translate-y-1/2
-                          items-center
-                          justify-center
-                          rounded-full
-                          bg-white/90
-                          text-neutral-950
-                          opacity-0
-                          shadow-sm
-                          backdrop-blur
-                          transition
-                          hover:bg-white
-                          group-hover:opacity-100
+                          absolute left-4 top-1/2 flex h-10 w-10
+                          -translate-y-1/2 items-center justify-center
+                          rounded-full bg-white/90 text-neutral-950
+                          opacity-0 shadow-sm backdrop-blur transition
+                          hover:bg-white group-hover:opacity-100
                         "
                       >
                         <ChevronLeft size={18} />
@@ -335,24 +430,11 @@ function ProductDetail({
                         onClick={goToNextImage}
                         aria-label="Next image"
                         className="
-                          absolute
-                          right-4
-                          top-1/2
-                          flex
-                          h-10
-                          w-10
-                          -translate-y-1/2
-                          items-center
-                          justify-center
-                          rounded-full
-                          bg-white/90
-                          text-neutral-950
-                          opacity-0
-                          shadow-sm
-                          backdrop-blur
-                          transition
-                          hover:bg-white
-                          group-hover:opacity-100
+                          absolute right-4 top-1/2 flex h-10 w-10
+                          -translate-y-1/2 items-center justify-center
+                          rounded-full bg-white/90 text-neutral-950
+                          opacity-0 shadow-sm backdrop-blur transition
+                          hover:bg-white group-hover:opacity-100
                         "
                       >
                         <ChevronRight size={18} />
@@ -360,21 +442,14 @@ function ProductDetail({
 
                       <div
                         className="
-                        absolute
-                        bottom-4
-                        left-1/2
-                        -translate-x-1/2
-                        rounded-full
-                        bg-black/60
-                        px-3
-                        py-1
-                        text-xs
-                        font-medium
-                        text-white
-                        backdrop-blur
-                      "
+                          absolute bottom-4 left-1/2
+                          -translate-x-1/2 rounded-full
+                          bg-black/60 px-3 py-1 text-xs
+                          font-medium text-white backdrop-blur
+                        "
                       >
-                        {selectedImageIndex + 1} / {galleryImages.length}
+                        {selectedImageIndex + 1} /{" "}
+                        {galleryImages.length}
                       </div>
                     </>
                   )}
@@ -383,9 +458,7 @@ function ProductDetail({
             </div>
           </div>
 
-          {/* =========================
-              PRODUCT INFORMATION
-          ========================= */}
+          {/* Product Information */}
           <div className="min-w-0 lg:py-2">
             {/* Badges */}
             {(product.isNew || product.isBestSeller) && (
@@ -423,8 +496,15 @@ function ProductDetail({
             {product.totalReviews > 0 && (
               <div className="mt-4 flex items-center gap-2 text-sm">
                 <span className="tracking-[0.1em] text-neutral-950">
-                  {"★".repeat(Math.round(product.avgRating))}
-                  {"☆".repeat(Math.max(0, 5 - Math.round(product.avgRating)))}
+                  {"★".repeat(
+                    Math.round(product.avgRating),
+                  )}
+                  {"☆".repeat(
+                    Math.max(
+                      0,
+                      5 - Math.round(product.avgRating),
+                    ),
+                  )}
                 </span>
 
                 <span className="font-medium text-neutral-900">
@@ -435,7 +515,9 @@ function ProductDetail({
 
                 <span className="text-neutral-500">
                   {product.totalReviews}{" "}
-                  {product.totalReviews === 1 ? "review" : "reviews"}
+                  {product.totalReviews === 1
+                    ? "review"
+                    : "reviews"}
                 </span>
               </div>
             )}
@@ -461,7 +543,8 @@ function ProductDetail({
 
             {product.priceRange?.min != null &&
               product.priceRange?.max != null &&
-              product.priceRange.min !== product.priceRange.max && (
+              product.priceRange.min !==
+                product.priceRange.max && (
                 <p className="mt-1 text-xs text-neutral-500">
                   Price varies by variant
                 </p>
@@ -480,7 +563,9 @@ function ProductDetail({
             {hasMultipleColors && (
               <div className="mt-8 border-t border-neutral-200 pt-7">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-neutral-950">Color</p>
+                  <p className="text-sm font-medium text-neutral-950">
+                    Color
+                  </p>
 
                   {selectedColor && (
                     <span className="text-sm text-neutral-500">
@@ -491,29 +576,27 @@ function ProductDetail({
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   {colors.map((color) => {
-                    const isSelected = selectedColor === color;
+                    const isSelected =
+                      selectedColor === color;
 
-                    const colorVariant = variants.find(
-                      (variant) => variant.color === color,
-                    );
-
-                    const isAvailable = Boolean(
-                      colorVariant && colorVariant.stock > 0,
+                    const isAvailable = variants.some(
+                      (variant) =>
+                        variant.color === color &&
+                        variant.isActive &&
+                        variant.stock > 0,
                     );
 
                     return (
                       <button
                         key={color}
                         type="button"
-                        onClick={() => handleColorChange(color)}
+                        onClick={() =>
+                          handleColorChange(color)
+                        }
                         disabled={!isAvailable}
                         className={`
-                          rounded-full
-                          border
-                          px-4
-                          py-2.5
-                          text-sm
-                          transition
+                          rounded-full border px-4 py-2.5
+                          text-sm transition
                           ${
                             isSelected
                               ? "border-neutral-950 bg-neutral-950 text-white"
@@ -535,7 +618,9 @@ function ProductDetail({
             {hasMultipleSizes && (
               <div className="mt-8 border-t border-neutral-200 pt-7">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-neutral-950">Size</p>
+                  <p className="text-sm font-medium text-neutral-950">
+                    Size
+                  </p>
 
                   <button
                     type="button"
@@ -547,34 +632,30 @@ function ProductDetail({
 
                 <div className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-5">
                   {sizes.map((size) => {
-                    const isSelected = selectedSize === size;
+                    const isSelected =
+                      selectedSize === size;
 
-                    const matchingVariant = variants.find(
+                    const isAvailable = variants.some(
                       (variant) =>
                         variant.size === size &&
                         (selectedColor === null ||
-                          variant.color === selectedColor),
-                    );
-
-                    const isAvailable = Boolean(
-                      matchingVariant && matchingVariant.stock > 0,
+                          variant.color === selectedColor) &&
+                        variant.isActive &&
+                        variant.stock > 0,
                     );
 
                     return (
                       <button
                         key={size}
                         type="button"
-                        onClick={() => handleSizeChange(size)}
+                        onClick={() =>
+                          handleSizeChange(size)
+                        }
                         disabled={!isAvailable}
                         className={`
-                          flex
-                          h-11
-                          items-center
-                          justify-center
-                          rounded-xl
-                          border
-                          text-sm
-                          transition
+                          flex h-11 items-center
+                          justify-center rounded-xl border
+                          text-sm transition
                           ${
                             isSelected
                               ? "border-neutral-950 bg-neutral-950 text-white"
@@ -592,7 +673,7 @@ function ProductDetail({
               </div>
             )}
 
-            {/* Variant status */}
+            {/* Variant Status */}
             {selectedVariant && (
               <div className="mt-8 border-t border-neutral-200 pt-7">
                 <div className="flex items-center justify-between">
@@ -602,12 +683,14 @@ function ProductDetail({
 
                   <p
                     className={`text-sm font-medium ${
-                      selectedVariant.stock > 0
+                      selectedVariant.stock > 0 &&
+                      selectedVariant.isActive
                         ? "text-neutral-700"
                         : "text-red-600"
                     }`}
                   >
-                    {selectedVariant.stock > 0
+                    {selectedVariant.stock > 0 &&
+                    selectedVariant.isActive
                       ? selectedVariant.stock <= 5
                         ? `Only ${selectedVariant.stock} left`
                         : "In stock"
@@ -623,26 +706,27 @@ function ProductDetail({
               </div>
             )}
 
-            {/* Quantity + Add to cart */}
+            {/* Quantity + Add to Cart */}
             <div className="mt-8 border-t border-neutral-200 pt-7">
               <div className="flex gap-3">
+                {/* Quantity */}
                 <div className="flex h-12 shrink-0 items-center rounded-full border border-neutral-200">
                   <button
                     type="button"
                     onClick={() =>
-                      setQuantity((current) => Math.max(1, current - 1))
+                      setQuantity((current) =>
+                        Math.max(1, current - 1),
+                      )
                     }
-                    disabled={quantity <= 1}
+                    disabled={
+                      quantity <= 1 ||
+                      addCartItemMutation.isPending
+                    }
                     aria-label="Decrease quantity"
                     className="
-                      flex
-                      h-full
-                      w-11
-                      items-center
-                      justify-center
-                      text-neutral-700
-                      transition
-                      hover:text-neutral-950
+                      flex h-full w-11 items-center
+                      justify-center text-neutral-700
+                      transition hover:text-neutral-950
                       disabled:cursor-not-allowed
                       disabled:opacity-30
                     "
@@ -664,17 +748,15 @@ function ProductDetail({
                         ),
                       )
                     }
-                    disabled={!canIncreaseQuantity}
+                    disabled={
+                      !canIncreaseQuantity ||
+                      addCartItemMutation.isPending
+                    }
                     aria-label="Increase quantity"
                     className="
-                      flex
-                      h-full
-                      w-11
-                      items-center
-                      justify-center
-                      text-neutral-700
-                      transition
-                      hover:text-neutral-950
+                      flex h-full w-11 items-center
+                      justify-center text-neutral-700
+                      transition hover:text-neutral-950
                       disabled:cursor-not-allowed
                       disabled:opacity-30
                     "
@@ -683,35 +765,50 @@ function ProductDetail({
                   </button>
                 </div>
 
+                {/* Add to Cart */}
                 <button
                   type="button"
-                  disabled={!canAddToCart}
+                  onClick={handleAddToCart}
+                  disabled={
+                    !canAddToCart ||
+                    addCartItemMutation.isPending ||
+                    isAuthLoading
+                  }
                   className="
-                    flex
-                    h-12
-                    min-w-0
-                    flex-1
-                    items-center
-                    justify-center
-                    rounded-full
-                    bg-neutral-950
-                    px-6
-                    text-sm
-                    font-medium
-                    text-white
-                    transition
-                    hover:bg-neutral-800
+                    flex h-12 min-w-0 flex-1
+                    items-center justify-center
+                    rounded-full bg-neutral-950 px-6
+                    text-sm font-medium text-white
+                    transition hover:bg-neutral-800
                     disabled:cursor-not-allowed
                     disabled:bg-neutral-200
                     disabled:text-neutral-400
                   "
                 >
-                  {canAddToCart ? "Add to cart" : "Out of stock"}
+                  {addCartItemMutation.isPending
+                    ? "Adding..."
+                    : !canAddToCart
+                      ? "Out of stock"
+                      : "Add to cart"}
                 </button>
               </div>
+
+              {/* Success / Error Feedback */}
+              {addCartItemMutation.isSuccess && (
+                <p className="mt-3 text-sm text-neutral-600">
+                  Added to your cart.
+                </p>
+              )}
+
+              {addCartItemMutation.isError && (
+                <p className="mt-3 text-sm text-red-600">
+                  Unable to add this item to your cart. Please
+                  try again.
+                </p>
+              )}
             </div>
 
-            {/* Shipping / fulfillment */}
+            {/* Shipping / Fulfillment */}
             {selectedVariant && (
               <div className="mt-8 space-y-3 border-t border-neutral-200 pt-7">
                 <div className="flex gap-3">
@@ -726,7 +823,9 @@ function ProductDetail({
                     </p>
 
                     <p className="mt-1 text-xs leading-5 text-neutral-500">
-                      {getFulfillmentLabel(selectedVariant.fulfillmentType)}
+                      {getFulfillmentLabel(
+                        selectedVariant.fulfillmentType,
+                      )}
                     </p>
                   </div>
                 </div>
@@ -737,7 +836,9 @@ function ProductDetail({
                   </span>
 
                   <span className="text-xs font-medium text-neutral-900">
-                    {getShippingLabel(selectedVariant.shippingType)}
+                    {getShippingLabel(
+                      selectedVariant.shippingType,
+                    )}
                   </span>
                 </div>
               </div>
@@ -745,7 +846,7 @@ function ProductDetail({
           </div>
         </section>
 
-        {/* Product details */}
+        {/* Product Details */}
         <section className="mt-20 border-t border-neutral-200 pt-12">
           <div className="grid gap-10 md:grid-cols-3">
             <div>
@@ -771,11 +872,17 @@ function ProductDetail({
 
               <div className="mt-8 grid gap-px overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-200 sm:grid-cols-2">
                 {product.brand && (
-                  <DetailItem label="Brand" value={product.brand.name} />
+                  <DetailItem
+                    label="Brand"
+                    value={product.brand.name}
+                  />
                 )}
 
                 {product.category && (
-                  <DetailItem label="Category" value={product.category.name} />
+                  <DetailItem
+                    label="Category"
+                    value={product.category.name}
+                  />
                 )}
 
                 {product.collection && (
@@ -786,7 +893,10 @@ function ProductDetail({
                 )}
 
                 {selectedVariant?.sku && (
-                  <DetailItem label="SKU" value={selectedVariant.sku} />
+                  <DetailItem
+                    label="SKU"
+                    value={selectedVariant.sku}
+                  />
                 )}
               </div>
             </div>
@@ -841,12 +951,20 @@ function ProductDetail({
   );
 }
 
-function DetailItem({ label, value }: { label: string; value: string }) {
+function DetailItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <div className="bg-white px-5 py-4">
       <p className="text-xs text-neutral-400">{label}</p>
 
-      <p className="mt-1 text-sm font-medium text-neutral-950">{value}</p>
+      <p className="mt-1 text-sm font-medium text-neutral-950">
+        {value}
+      </p>
     </div>
   );
 }
@@ -872,7 +990,9 @@ function getFulfillmentLabel(
   }
 }
 
-function getShippingLabel(shippingType: ProductVariant["shippingType"]) {
+function getShippingLabel(
+  shippingType: ProductVariant["shippingType"],
+) {
   switch (shippingType) {
     case "LOCAL":
       return "Local delivery";
@@ -948,8 +1068,8 @@ function ProductNotFound() {
         </h1>
 
         <p className="mt-2 max-w-md text-sm leading-6 text-neutral-500">
-          The product you're looking for doesn't exist or is no longer
-          available.
+          The product you're looking for doesn't exist or is no
+          longer available.
         </p>
 
         <Link

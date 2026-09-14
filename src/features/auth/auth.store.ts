@@ -1,60 +1,32 @@
 import { create } from "zustand";
-import { getMe, login, logout } from "./auth.api";
-import type { AuthUser, LoginPayload } from "./auth.api";
 
 interface AuthState {
-  user: AuthUser | null;
-  isLoading: boolean;
   isAuthenticated: boolean;
+  isHydrating: boolean;
 
-  login: (payload: LoginPayload) => Promise<void>;
-  loadUser: () => Promise<void>;
-  logout: () => Promise<void>;
+  setAuthenticated: (value: boolean) => void;
+  setHydrating: (value: boolean) => void;
+
+  reset: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  isLoading: true,
   isAuthenticated: false,
+  isHydrating: true,
 
-  login: async (payload: LoginPayload) => {
-    const result = await login(payload);
-
+  setAuthenticated: (value) =>
     set({
-      user: result.user,
-      isAuthenticated: true,
-      isLoading: false,
-    });
-  },
+      isAuthenticated: value,
+    }),
 
-  loadUser: async () => {
-    try {
-      const user = await getMe();
+  setHydrating: (value) =>
+    set({
+      isHydrating: value,
+    }),
 
-      set({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } catch {
-      set({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
-    }
-  },
-
-  logout: async () => {
-    try {
-      await logout();
-    } finally {
-      set({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
-    }
-  },
+  reset: () =>
+    set({
+      isAuthenticated: false,
+      isHydrating: false,
+    }),
 }));
-

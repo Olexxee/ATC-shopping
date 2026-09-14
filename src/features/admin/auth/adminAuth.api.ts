@@ -1,5 +1,6 @@
 import { api } from "../../../lib/api";
 
+
 export interface AdminUser {
   id: string;
   fullName: string;
@@ -7,6 +8,10 @@ export interface AdminUser {
   phone?: string | null;
   role?: string;
   status: string;
+}
+
+interface AuthResponse {
+  user: AdminUser;
 }
 
 interface AuthResponse {

@@ -1,11 +1,80 @@
+import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { ProductCardData } from "../../types/product-ui";
+import {
+  useAddToWishlist,
+  useRemoveFromWishlist,
+} from "../../features/wishlist/wishlist.mutations";
 
 interface ProductCardProps {
   product: ProductCardData;
+  isAuthenticated: boolean;
+  isInWishlist: boolean;
+  wishlistLoading?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({
+  product,
+  isAuthenticated,
+  isInWishlist,
+  wishlistLoading = false,
+}: ProductCardProps) {
+  const navigate = useNavigate();
+
+  const addToWishlistMutation = useAddToWishlist();
+  const removeFromWishlistMutation = useRemoveFromWishlist();
+
+  const [optimisticWishlist, setOptimisticWishlist] = useState(isInWishlist);
+
+  const isMutating =
+    addToWishlistMutation.isPending || removeFromWishlistMutation.isPending;
+
+  useEffect(() => {
+    setOptimisticWishlist(isInWishlist);
+  }, [isInWishlist]);
+
+  const handleWishlistClick = () => {
+    if (!isAuthenticated) {
+      navigate("/auth/login", {
+        state: {
+          from: `/products/${product.slug}`,
+        },
+      });
+
+      return;
+    }
+
+    const previousState = optimisticWishlist;
+    const nextState = !previousState;
+
+    // Update the UI immediately.
+    setOptimisticWishlist(nextState);
+
+    if (nextState) {
+      addToWishlistMutation.mutate(
+        {
+          productId: product.id,
+        },
+        {
+          onError: () => {
+            // Roll back if the API request fails.
+            setOptimisticWishlist(previousState);
+          },
+        },
+      );
+
+      return;
+    }
+
+    removeFromWishlistMutation.mutate(product.id, {
+      onError: () => {
+        // Roll back if the API request fails.
+        setOptimisticWishlist(previousState);
+      },
+    });
+  };
+
   return (
     <article className="group min-w-0">
       <div className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100">
@@ -42,10 +111,25 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <button
           type="button"
-          aria-label={`Add ${product.name} to wishlist`}
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white text-neutral-700 shadow-sm transition hover:bg-neutral-950 hover:text-white"
+          onClick={handleWishlistClick}
+          disabled={wishlistLoading || isMutating}
+          aria-label={
+            optimisticWishlist
+              ? `Remove ${product.name} from wishlist`
+              : `Add ${product.name} to wishlist`
+          }
+          aria-pressed={optimisticWishlist}
+          className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition ${
+            optimisticWishlist
+              ? "bg-white text-red-500 hover:bg-red-50"
+              : "bg-white text-neutral-700 hover:bg-neutral-950 hover:text-white"
+          } disabled:cursor-not-allowed disabled:opacity-60`}
         >
-          <Heart size={17} />
+          <Heart
+            size={17}
+            fill={optimisticWishlist ? "currentColor" : "none"}
+            strokeWidth={optimisticWishlist ? 2.5 : 2}
+          />
         </button>
       </div>
 
