@@ -3,8 +3,7 @@ import { useAuthStore } from "../../features/auth/auth.store";
 import { AdminSidebar } from "../../components/admin/AdminSidebar";
 
 export function AdminLayout() {
-  const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
+  const reset = useAuthStore((state) => state.reset);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -21,13 +20,13 @@ export function AdminLayout() {
           <div className="flex items-center gap-4">
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium text-slate-900">
-                {user?.fullName ?? "Administrator"}
+                Administrator
               </p>
             </div>
 
             <button
               type="button"
-              onClick={() => void logout()}
+              onClick={reset}
               className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
             >
               Logout

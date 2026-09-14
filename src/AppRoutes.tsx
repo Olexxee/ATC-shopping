@@ -13,6 +13,10 @@ import { BrandPage } from "./pages/brands/BrandPage";
 import { CategoriesPage } from "./pages/categories/CategoriesPage";
 import { CategoryPage } from "./pages/categories/CategoryPage";
 import CartPage from "./pages/Cart/CartPage";
+import WishlistPage from "./pages/wishlist/WishlistPage";
+import CheckoutPage from "./pages/checkout/CheckoutPage";
+import OrderPage from "./pages/orders/OrderPage";
+import AddressesPage from "./pages/address/AddressesPage";
 
 // Admin
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
@@ -48,6 +52,10 @@ export function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/orders/:id" element={<OrderPage />} />
+        <Route path="/addresses" element={<AddressesPage />} />
       </Route>
 
       {/* ================================================================

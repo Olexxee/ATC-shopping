@@ -56,14 +56,12 @@ export interface CartItem {
   id: string;
   variantId: string;
   quantity: number;
-
   unitPrice: number;
+  unitPriceSnapshot: number;
   lineTotal: number;
-
   availableStock: number;
   inStock: boolean;
   unavailable: boolean;
-
   variant: CartVariant | null;
 }
 

@@ -31,7 +31,7 @@ export default function CartSummary({
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">Shipping</span>
 
-          <span className="text-sm text-gray-500">Calculated at checkout</span>
+          <span className="text-gray-500">Calculated at checkout</span>
         </div>
 
         <div className="flex items-center justify-between text-sm">

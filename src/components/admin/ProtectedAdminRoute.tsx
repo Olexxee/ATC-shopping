@@ -2,20 +2,14 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "../../features/auth/auth.store";
 
 export function ProtectedAdminRoute() {
-  const isAuthenticated = useAuthStore(
-    (state) => state.isAuthenticated,
-  );
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  const isLoading = useAuthStore(
-    (state) => state.isLoading,
-  );
+  const isHydrating = useAuthStore((state) => state.isHydrating);
 
-  if (isLoading) {
+  if (isHydrating) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-slate-500">
-          Loading...
-        </p>
+        <p className="text-sm text-slate-500">Loading...</p>
       </div>
     );
   }
@@ -26,4 +20,3 @@ export function ProtectedAdminRoute() {
 
   return <Outlet />;
 }
-

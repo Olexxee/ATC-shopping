@@ -2,9 +2,9 @@ import { useState } from "react";
 import { ArrowLeft, Heart, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { WishlistItemCard } from "../../components/wishlist/WishlistItemCard";
-
 import { useWishlist } from "../../features/wishlist/wishlist.queries";
 import { useRemoveFromWishlist } from "../../features/wishlist/wishlist.mutations";
+
 
 const PAGE_SIZE = 20;
 
