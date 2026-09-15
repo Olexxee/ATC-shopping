@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Container } from "../layout/Container";
-import { HeaderActions } from "./HeaderActions";
+import { CartButton, HeaderActions, WishlistButton } from "./HeaderActions";
 import { Logo } from "./Logo";
 import { MobileMenuButton } from "./MobileMenuButton";
 import { MobileNavigation } from "./MobileNavigation";
@@ -22,6 +22,11 @@ export function Header() {
           <div className="flex items-center">
             <div className="hidden sm:block">
               <HeaderActions />
+            </div>
+
+            <div className="flex items-center gap-1 sm:hidden">
+              <WishlistButton />
+              <CartButton />
             </div>
 
             <div className="lg:hidden">
