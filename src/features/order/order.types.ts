@@ -5,6 +5,30 @@ export interface OrderMedia {
   sortOrder: number;
 }
 
+export interface GetMyOrdersQuery {
+  page?: number;
+  limit?: number;
+  status?: string;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface OrdersMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface OrdersResponse {
+  success: boolean;
+  message: string;
+  data: Order[];
+  meta: OrdersMeta;
+}
+
+
 export interface OrderBrand {
   id: string;
   name: string;

@@ -9,6 +9,7 @@ import PaymentCallbackPage from "./pages/payment/PaymentCallbackPage";
 
 // Storefront
 import { HomePage } from "./pages/home/HomePage";
+import AccountPage from "./pages/account/AccountPage";
 import { ProductsPage } from "./pages/products/ProductsPage";
 import { ProductPage } from "./pages/products/ProductPage";
 import { BrandsPage } from "./pages/brands/BrandsPage";
@@ -20,6 +21,7 @@ import WishlistPage from "./pages/wishlist/WishlistPage";
 import CheckoutPage from "./pages/checkout/CheckoutPage";
 import OrderPage from "./pages/orders/OrderPage";
 import AddressesPage from "./pages/address/AddressesPage";
+import OrdersPage from "./pages/orders/OrdersPage";
 
 // Admin
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
@@ -54,6 +56,8 @@ export function AppRoutes() {
       ================================================================ */}
 
       <Route element={<ProtectedRoute />}>
+        <Route path="/account" element={<AccountPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
