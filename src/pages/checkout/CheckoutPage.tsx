@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Lock, ShoppingBag } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useCart } from "../../features/cart/cart.queries";
 import { useCartStore } from "../../features/cart/cart.store";
 import { useMyAddresses } from "../../features/address/address.queries";
@@ -10,9 +10,8 @@ import CheckoutNotes from "../../components/checkout/CheckoutNotes";
 import CheckoutOrderSummary from "../../components/checkout/CheckoutOrderSummary";
 
 
-export default function CheckoutPage() {
-  const navigate = useNavigate();
 
+export default function CheckoutPage() {
   const {
     data: serverCart,
     isLoading: isCartLoading,
@@ -64,7 +63,16 @@ export default function CheckoutPage() {
       },
       {
         onSuccess: (response) => {
-          navigate(`/orders/${response.data.id}`);
+          const authorizationUrl =
+            response.data.payment?.authorizationUrl;
+
+          if (!authorizationUrl) {
+            throw new Error(
+              "Payment authorization URL was not returned.",
+            );
+          }
+
+          window.location.assign(authorizationUrl);
         },
       },
     );
@@ -215,7 +223,9 @@ function CheckoutMessage({
           <ShoppingBag className="h-7 w-7 text-gray-500" />
         </div>
 
-        <h1 className="mt-5 text-xl font-bold text-gray-900">{title}</h1>
+        <h1 className="mt-5 text-xl font-bold text-gray-900">
+          {title}
+        </h1>
 
         <p className="mt-2 text-sm text-gray-500">{message}</p>
 
@@ -224,3 +234,4 @@ function CheckoutMessage({
     </main>
   );
 }
+

@@ -4,6 +4,9 @@ import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 
+//Payment
+import PaymentCallbackPage from "./pages/payment/PaymentCallbackPage";
+
 // Storefront
 import { HomePage } from "./pages/home/HomePage";
 import { ProductsPage } from "./pages/products/ProductsPage";
@@ -56,6 +59,7 @@ export function AppRoutes() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/orders/:id" element={<OrderPage />} />
         <Route path="/addresses" element={<AddressesPage />} />
+        <Route path="/payment/callback" element={<PaymentCallbackPage />} />
       </Route>
 
       {/* ================================================================

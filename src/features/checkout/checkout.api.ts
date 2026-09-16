@@ -1,4 +1,5 @@
 import { api } from "../../lib/api";
+
 import type { CheckoutPayload, CheckoutResponse } from "./checkout.types";
 
 export const createCheckoutOrder = async (

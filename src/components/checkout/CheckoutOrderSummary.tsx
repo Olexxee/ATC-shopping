@@ -157,9 +157,9 @@ export default function CheckoutOrderSummary({
         )}
       </button>
 
-      <p className="mt-3 text-center text-xs text-gray-400">
+      {/* <p className="mt-3 text-center text-xs text-gray-400">
         Your final shipping cost will be calculated by Keplex.
-      </p>
+      </p> */}
     </section>
   );
 }
