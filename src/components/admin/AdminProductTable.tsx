@@ -123,7 +123,16 @@ export function AdminProductTable({
                         disabled={isDeleting}
                         onClick={() => onDelete(product)}
                         className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 text-red-500 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                        title="Delete product"
+                        title={
+                          isDeleting
+                            ? `Deleting ${product.name}`
+                            : `Delete ${product.name}`
+                        }
+                        aria-label={
+                          isDeleting
+                            ? `Deleting ${product.name}`
+                            : `Delete ${product.name}`
+                        }
                       >
                         <Trash2 size={15} />
                       </button>
