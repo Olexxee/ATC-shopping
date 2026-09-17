@@ -6,8 +6,25 @@ import {
 import { useCategories } from "../categories/categories.queries";
 import { useBrands } from "../brands/brands.queries";
 import { useStorefrontConfig } from "../businessConfig/businessConfig.queries";
+import type { HeroSlideData } from "../../types/homepage-ui";
 
-
+function mapHeroSlides(
+  slides: NonNullable<
+    ReturnType<typeof useStorefrontConfig>["data"]
+  >["heroSlides"] = [],
+): HeroSlideData[] {
+  return slides.map((slide) => ({
+    id: slide.id,
+    eyebrow: slide.eyebrow ?? undefined,
+    title: slide.title,
+    description: slide.description ?? undefined,
+    image: slide.image,
+    mobileImage: slide.mobileImage ?? undefined,
+    href: slide.href,
+    actionLabel: slide.actionLabel ?? undefined,
+    alignment: slide.alignment ?? "left",
+  }));
+}
 
 export function useHomepageData() {
   const featuredQuery = useFeaturedProducts({
@@ -33,8 +50,7 @@ export function useHomepageData() {
   const storefrontConfigQuery = useStorefrontConfig();
 
   return {
-    hero: storefrontConfigQuery.data?.heroSlides ?? [],
-
+    hero: mapHeroSlides(storefrontConfigQuery.data?.heroSlides ?? []),
     featured: featuredQuery.data ?? [],
     newArrivals: newArrivalsQuery.data ?? [],
     bestSellers: bestSellersQuery.data ?? [],

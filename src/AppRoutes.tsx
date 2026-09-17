@@ -1,102 +1,143 @@
 import { Route, Routes } from "react-router-dom";
 
-// Auth
+// ============================================================
+// AUTH
+// ============================================================
+
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 
-//Payment
+// ============================================================
+// PAYMENT
+// ============================================================
+
 import PaymentCallbackPage from "./pages/payment/PaymentCallbackPage";
 
-// Storefront
+// ============================================================
+// STOREFRONT
+// ============================================================
+
 import { HomePage } from "./pages/home/HomePage";
 import AccountPage from "./pages/account/AccountPage";
+
 import { ProductsPage } from "./pages/products/ProductsPage";
 import { ProductPage } from "./pages/products/ProductPage";
+
 import { BrandsPage } from "./pages/brands/BrandsPage";
 import { BrandPage } from "./pages/brands/BrandPage";
+
 import { CategoriesPage } from "./pages/categories/CategoriesPage";
 import { CategoryPage } from "./pages/categories/CategoryPage";
+
 import CartPage from "./pages/Cart/CartPage";
 import WishlistPage from "./pages/wishlist/WishlistPage";
 import CheckoutPage from "./pages/checkout/CheckoutPage";
-import OrderPage from "./pages/orders/OrderPage";
-import AddressesPage from "./pages/address/AddressesPage";
-import OrdersPage from "./pages/orders/OrdersPage";
 
-// Admin
+import OrdersPage from "./pages/orders/OrdersPage";
+import OrderPage from "./pages/orders/OrderPage";
+
+import AddressesPage from "./pages/address/AddressesPage";
+
+// ============================================================
+// ADMIN
+// ============================================================
+
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
+
 import { AdminProductsPage } from "./pages/admin/AdminProductsPage";
 import { AdminCreateProductPage } from "./pages/admin/AdminCreateProductPage";
-import { AdminEditCategoryPage } from "./pages/admin/AdminEditCategoryPage";
+
+import { AdminCategoriesPage } from "./pages/admin/AdminCategoriesPage";
 import { AdminCreateCategoryPage } from "./pages/admin/AdminCreateCategoryPage";
+import { AdminEditCategoryPage } from "./pages/admin/AdminEditCategoryPage";
+
+import { AdminBrandsPage } from "./pages/admin/AdminBrandsPage";
 import { AdminCreateBrandPage } from "./pages/admin/AdminCreateBrandPage";
 import { AdminEditBrandPage } from "./pages/admin/AdminEditBrandPage";
-import { AdminCategoriesPage } from "./pages/admin/AdminCategoriesPage";
-import { AdminBrandsPage } from "./pages/admin/AdminBrandsPage";
+
+import { AdminWarehousesPage } from "./pages/admin/AdminWarehousesPage";
+import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
+import { AdminShippingPage } from "./pages/admin/AdminShippingPage";
 
 import { AdminRoute } from "./routes/AdminRoute";
 import { AdminLayout } from "./components/admin/AdminLayout";
+
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+
+// ============================================================
+// ROUTES
+// ============================================================
 
 export function AppRoutes() {
   return (
     <Routes>
-      {/* ================================================================
+      {/* ============================================================
           AUTH
-      ================================================================ */}
+      ============================================================ */}
 
       <Route path="/auth">
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
       </Route>
 
-      {/* ================================================================
+      {/* ============================================================
           PROTECTED STOREFRONT
-      ================================================================ */}
+      ============================================================ */}
 
       <Route element={<ProtectedRoute />}>
         <Route path="/account" element={<AccountPage />} />
+
         <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/wishlist" element={<WishlistPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/orders/:id" element={<OrderPage />} />
+
+        <Route path="/cart" element={<CartPage />} />
+
+        <Route path="/wishlist" element={<WishlistPage />} />
+
+        <Route path="/checkout" element={<CheckoutPage />} />
+
         <Route path="/addresses" element={<AddressesPage />} />
+
         <Route path="/payment/callback" element={<PaymentCallbackPage />} />
       </Route>
 
-      {/* ================================================================
-          STOREFRONT
-      ================================================================ */}
+      {/* ============================================================
+          PUBLIC STOREFRONT
+      ============================================================ */}
 
       <Route path="/" element={<HomePage />} />
 
       <Route path="/products" element={<ProductsPage />} />
-
       <Route path="/products/:slug" element={<ProductPage />} />
 
       <Route path="/categories" element={<CategoriesPage />} />
-
       <Route path="/categories/:slug" element={<CategoryPage />} />
 
       <Route path="/brands" element={<BrandsPage />} />
-
       <Route path="/brands/:slug" element={<BrandPage />} />
 
-      {/* ================================================================
+      {/* ============================================================
           ADMIN AUTH
-      ================================================================ */}
+      ============================================================ */}
 
       <Route path="/admin/login" element={<AdminLoginPage />} />
 
-      {/* ================================================================
-          ADMIN
-      ================================================================ */}
+      {/* ============================================================
+          PROTECTED ADMIN
+      ============================================================ */}
 
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
+          {/* --------------------------------------------------------
+              OVERVIEW
+          -------------------------------------------------------- */}
+
           <Route path="dashboard" element={<AdminDashboardPage />} />
+
+          {/* --------------------------------------------------------
+              CATALOG
+          -------------------------------------------------------- */}
 
           <Route path="products" element={<AdminProductsPage />} />
 
@@ -111,11 +152,11 @@ export function AppRoutes() {
             element={<AdminEditCategoryPage />}
           />
 
+          <Route path="brands" element={<AdminBrandsPage />} />
+
           <Route path="brands/new" element={<AdminCreateBrandPage />} />
 
           <Route path="brands/:id/edit" element={<AdminEditBrandPage />} />
-
-          <Route path="brands" element={<AdminBrandsPage />} />
 
           <Route
             path="collections"
@@ -126,6 +167,10 @@ export function AppRoutes() {
             path="inventory"
             element={<AdminComingSoonPage title="Inventory" />}
           />
+
+          {/* --------------------------------------------------------
+              SALES
+          -------------------------------------------------------- */}
 
           <Route
             path="orders"
@@ -138,14 +183,28 @@ export function AppRoutes() {
           />
 
           <Route
-            path="settings"
-            element={<AdminComingSoonPage title="Settings" />}
+            path="fulfillments"
+            element={<AdminComingSoonPage title="Fulfillments" />}
           />
+
+          {/* --------------------------------------------------------
+              SYSTEM
+          -------------------------------------------------------- */}
+
+          <Route path="settings" element={<AdminSettingsPage />} />
+
+          <Route path="shipping" element={<AdminShippingPage />} />
+
+          <Route path="warehouses" element={<AdminWarehousesPage />} />
         </Route>
       </Route>
     </Routes>
   );
 }
+
+// ============================================================
+// ADMIN COMING SOON
+// ============================================================
 
 function AdminComingSoonPage({ title }: { title: string }) {
   return (
@@ -154,7 +213,9 @@ function AdminComingSoonPage({ title }: { title: string }) {
         Administration
       </p>
 
-      <h1 className="mt-2 text-xl font-semibold text-slate-900">{title}</h1>
+      <h1 className="mt-2 text-xl font-semibold text-slate-900">
+        {title}
+      </h1>
 
       <p className="mt-2 text-sm text-slate-500">
         This section is not available yet.

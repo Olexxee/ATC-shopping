@@ -1,4 +1,3 @@
-import { X } from "lucide-react";
 import {
   BarChart3,
   Boxes,
@@ -8,7 +7,10 @@ import {
   Settings,
   ShoppingCart,
   Store,
+  Truck,
   Users,
+  Warehouse,
+  X,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -28,6 +30,7 @@ const navigation = [
       },
     ],
   },
+
   {
     section: "Catalog",
     items: [
@@ -58,6 +61,7 @@ const navigation = [
       },
     ],
   },
+
   {
     section: "Sales",
     items: [
@@ -71,8 +75,14 @@ const navigation = [
         to: "/admin/customers",
         icon: Users,
       },
+      {
+        label: "Fulfillments",
+        to: "/admin/fulfillments",
+        icon: Truck,
+      },
     ],
   },
+
   {
     section: "System",
     items: [
@@ -80,6 +90,16 @@ const navigation = [
         label: "Settings",
         to: "/admin/settings",
         icon: Settings,
+      },
+      {
+        label: "Shipping",
+        to: "/admin/shipping",
+        icon: Truck,
+      },
+      {
+        label: "Warehouses",
+        to: "/admin/warehouses",
+        icon: Warehouse,
       },
     ],
   },
@@ -92,23 +112,23 @@ export function AdminSidebar({
   return (
     <>
       {/* ============================================================
-DESKTOP SIDEBAR
-============================================================ */}{" "}
+          DESKTOP SIDEBAR
+      ============================================================ */}
       <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white lg:block">
-        {" "}
         <div className="sticky top-0 flex h-[calc(100vh-4rem)] flex-col overflow-y-auto p-4">
-          {" "}
-          <SidebarNavigation />{" "}
-        </div>{" "}
+          <SidebarNavigation />
+        </div>
       </aside>
-      ```
+
       {/* ============================================================
-      MOBILE SIDEBAR
-  ============================================================ */}
+          MOBILE SIDEBAR
+      ============================================================ */}
       <div
         className={[
           "fixed inset-0 z-50 lg:hidden",
-          mobileOpen ? "pointer-events-auto" : "pointer-events-none",
+          mobileOpen
+            ? "pointer-events-auto"
+            : "pointer-events-none",
         ].join(" ")}
       >
         {/* Backdrop */}
@@ -127,7 +147,9 @@ DESKTOP SIDEBAR
           className={[
             "absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-white shadow-xl",
             "transition-transform duration-300 ease-in-out",
-            mobileOpen ? "translate-x-0" : "-translate-x-full",
+            mobileOpen
+              ? "translate-x-0"
+              : "-translate-x-full",
           ].join(" ")}
         >
           {/* Mobile drawer header */}
@@ -137,7 +159,9 @@ DESKTOP SIDEBAR
                 Keplex
               </span>
 
-              <span className="ml-2 text-sm text-slate-400">Admin</span>
+              <span className="ml-2 text-sm text-slate-400">
+                Admin
+              </span>
             </div>
 
             <button
@@ -164,15 +188,17 @@ interface SidebarNavigationProps {
   onNavigate?: () => void;
 }
 
-function SidebarNavigation({ onNavigate }: SidebarNavigationProps) {
+function SidebarNavigation({
+  onNavigate,
+}: SidebarNavigationProps) {
   return (
     <nav className="space-y-6">
       {navigation.map((group) => (
         <div key={group.section}>
-          {" "}
           <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-            {group.section}{" "}
+            {group.section}
           </p>
+
           <div className="space-y-1">
             {group.items.map((item) => {
               const Icon = item.icon;
@@ -192,7 +218,6 @@ function SidebarNavigation({ onNavigate }: SidebarNavigationProps) {
                   }
                 >
                   <Icon size={17} />
-
                   <span>{item.label}</span>
                 </NavLink>
               );

@@ -12,11 +12,10 @@ import { mapProductsToCards } from "../../mappers/product.mapper";
 import { mapCategoriesToCards } from "../../mappers/category.mapper";
 import { mapBrandsToCards } from "../../mappers/brand.mapper";
 
-
-
 export function HomePage() {
-  const { categories, brands, featured, newArrivals, bestSellers } =
+  const { hero, categories, brands, featured, newArrivals, bestSellers } =
     useHomepageData();
+
 
   const categoryCards = mapCategoriesToCards(categories);
 
@@ -33,7 +32,7 @@ export function HomePage() {
       <Header />
 
       <main>
-        <HeroSection slides={[]} />
+        <HeroSection slides={hero} />
 
         <CategorySection categories={categoryCards} />
 
