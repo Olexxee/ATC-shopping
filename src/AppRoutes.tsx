@@ -52,6 +52,8 @@ import { AdminCategoriesPage } from "./pages/admin/AdminCategoriesPage";
 import { AdminCreateCategoryPage } from "./pages/admin/AdminCreateCategoryPage";
 import { AdminEditCategoryPage } from "./pages/admin/AdminEditCategoryPage";
 
+import AdminFulfillmentsPage from "./pages/admin/AdminFulfillmentsPage";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import { AdminBrandsPage } from "./pages/admin/AdminBrandsPage";
 import { AdminCreateBrandPage } from "./pages/admin/AdminCreateBrandPage";
 import { AdminEditBrandPage } from "./pages/admin/AdminEditBrandPage";
@@ -172,20 +174,13 @@ export function AppRoutes() {
               SALES
           -------------------------------------------------------- */}
 
-          <Route
-            path="orders"
-            element={<AdminComingSoonPage title="Orders" />}
-          />
+          <Route path="orders" element={<AdminOrdersPage />} />
 
           <Route
             path="customers"
             element={<AdminComingSoonPage title="Customers" />}
           />
-
-          <Route
-            path="fulfillments"
-            element={<AdminComingSoonPage title="Fulfillments" />}
-          />
+          <Route path="fulfillments" element={<AdminFulfillmentsPage />} />
 
           {/* --------------------------------------------------------
               SYSTEM
@@ -213,9 +208,7 @@ function AdminComingSoonPage({ title }: { title: string }) {
         Administration
       </p>
 
-      <h1 className="mt-2 text-xl font-semibold text-slate-900">
-        {title}
-      </h1>
+      <h1 className="mt-2 text-xl font-semibold text-slate-900">{title}</h1>
 
       <p className="mt-2 text-sm text-slate-500">
         This section is not available yet.
