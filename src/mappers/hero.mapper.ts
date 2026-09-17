@@ -9,8 +9,8 @@ export function mapHeroSlide(slide: HeroSlideApi): HeroSlideData {
     description: slide.description ?? undefined,
     image: slide.image,
     mobileImage: slide.mobileImage ?? undefined,
-    href: slide.href,
-    actionLabel: slide.actionLabel ?? undefined,
+    // href: slide.href,
+    // actionLabel: slide.actionLabel ?? undefined,
     alignment: slide.alignment ?? "left",
   };
 }
