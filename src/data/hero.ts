@@ -9,8 +9,6 @@ export const heroSlides: HeroSlideData[] = [
       "Discover products from global suppliers and bring them closer to home.",
     image: "/images/hero/importation-desktop.jpg",
     mobileImage: "/images/hero/importation-mobile.jpg",
-    href: "/importation",
-    actionLabel: "Explore importation",
     alignment: "left",
   },
 
@@ -21,8 +19,8 @@ export const heroSlides: HeroSlideData[] = [
     description: "Shop a curated selection of products sourced for you.",
     image: "/images/hero/global-shopping-desktop.jpg",
     mobileImage: "/images/hero/global-shopping-mobile.jpg",
-    href: "/shop",
-    actionLabel: "Shop now",
+    // href: "/shop",
+    // actionLabel: "Shop now",
     alignment: "left",
   },
 ];
