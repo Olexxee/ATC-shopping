@@ -46,15 +46,6 @@ export function Hero({ slide }: HeroProps) {
               {slide.description}
             </p>
           )}
-
-          {slide.href && slide.actionLabel && (
-            <a
-              href={slide.href}
-              className="mt-8 inline-flex h-12 items-center rounded-full bg-white px-6 text-sm font-semibold text-neutral-950 transition-transform hover:scale-[1.02]"
-            >
-              {slide.actionLabel}
-            </a>
-          )}
         </div>
       </div>
     </section>
