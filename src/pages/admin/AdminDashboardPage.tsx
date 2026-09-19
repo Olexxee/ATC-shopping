@@ -1,209 +1,179 @@
-import { Link } from "react-router-dom";
-import { ArrowRight, Package, Plus } from "lucide-react";
-import type { ReactNode } from "react";
-import { useAdminProduct } from "../../features/admin/products/hooks/useAdminProduct";
+// import { Link } from "react-router-dom";
+// import { ArrowRight, Package, Plus } from "lucide-react";
+// import type { ReactNode } from "react";
+// import { useAdminProducts } from "../../features/admin/products/hooks/useAdminProducts";
 
-export function AdminDashboardPage() {
-  const productsQuery = useAdminProduct(1, 100, {} as any);
+// export function AdminDashboardPage() {
+//   // Fetch a large batch of products for the summary stats. The dashboard
+//   // is a read-only overview — 100 is plenty to compute counts from, and
+//   // it's cheaper than issuing four separate count queries on the backend.
+//   const productsQuery = useAdminProducts({ page: 1, limit: 100 });
 
-  const products = (productsQuery as any)?.data?.data?.products ?? [];
+//   const products = productsQuery.data?.products ?? [];
+//   const totalProducts = productsQuery.data?.pagination?.total ?? 0;
 
-  const totalProducts = (productsQuery as any)?.data?.meta?.total ?? 0;
+//   const activeProducts = products.filter((p) => p.status === "ACTIVE").length;
+//   const draftProducts = products.filter((p) => p.status === "DRAFT").length;
 
+//   // NOTE: `AdminListRow` (the shape this hook returns) does NOT include
+//   // variants. The low-stock count can't be computed from it. When the
+//   // backend exposes a low-stock endpoint (or a variant count summary on
+//   // the list row), wire it here. For now the card renders "—".
+//   const lowStockProducts: number | null = null;
 
-  const activeProducts = products.filter(
-    (product: { status: string }) => product.status === "ACTIVE",
-  ).length;
+//   const isLoading = productsQuery.isLoading;
+//   const lowStockDisplay = isLoading
+//     ? "—"
+//     : lowStockProducts == null
+//       ? "—"
+//       : lowStockProducts.toLocaleString();
 
-  const draftProducts = products.filter(
-    (product: { status: string }) => product.status === "DRAFT",
-  ).length;
+//   return (
+//     <div className="mx-auto max-w-7xl">
+//       <div className="mb-8">
+//         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+//           Overview
+//         </p>
 
-  const lowStockProducts = products.filter(
-    (product: { variants?: Array<{ stock: number }> }) =>
-      Array.isArray(product.variants) &&
-      product.variants.length > 0 &&
-      product.variants.every((variant: { stock: number }) => variant.stock <= 5),
-  ).length;
+//         <h1 className="mt-2 text-2xl font-semibold text-slate-900">
+//           Dashboard
+//         </h1>
 
-  return (
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-          Overview
-        </p>
+//         <p className="mt-2 text-sm text-slate-500">
+//           Manage your Keplex store from one place.
+//         </p>
+//       </div>
 
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900">
-          Dashboard
-        </h1>
+//       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+//         <StatCard
+//           label="Total products"
+//           value={isLoading ? "—" : totalProducts.toLocaleString()}
+//           icon={<Package size={18} />}
+//         />
 
-        <p className="mt-2 text-sm text-slate-500">
-          Manage your Keplex store from one place.
-        </p>
-      </div>
+//         <StatCard
+//           label="Active"
+//           value={isLoading ? "—" : activeProducts.toLocaleString()}
+//           icon={<Package size={18} />}
+//         />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Total products"
-          value={
-            productsQuery.isLoading
-              ? "—"
-              : totalProducts.toLocaleString()
-          }
-          icon={<Package size={18} />}
-        />
+//         <StatCard
+//           label="Drafts"
+//           value={isLoading ? "—" : draftProducts.toLocaleString()}
+//           icon={<Package size={18} />}
+//         />
 
-        <StatCard
-          label="Active"
-          value={
-            productsQuery.isLoading
-              ? "—"
-              : activeProducts.toLocaleString()
-          }
-          icon={<Package size={18} />}
-        />
+//         <StatCard
+//           label="Low stock"
+//           value={
+//             isLoading || lowStockProducts === null
+//               ? "—"
+//               : lowStockProducts.toLocaleString()
+//           }
+//           icon={<Package size={18} />}
+//         />
+//       </div>
 
-        <StatCard
-          label="Drafts"
-          value={
-            productsQuery.isLoading
-              ? "—"
-              : draftProducts.toLocaleString()
-          }
-          icon={<Package size={18} />}
-        />
+//       <div className="mt-8 grid gap-6 lg:grid-cols-2">
+//         <section className="rounded-xl border border-slate-200 bg-white p-6">
+//           <h2 className="text-base font-semibold text-slate-900">
+//             Quick actions
+//           </h2>
 
-        <StatCard
-          label="Low stock"
-          value={
-            productsQuery.isLoading
-              ? "—"
-              : lowStockProducts.toLocaleString()
-          }
-          icon={<Package size={18} />}
-        />
-      </div>
+//           <div className="mt-5 space-y-3">
+//             <Link
+//               to="/admin/products/new"
+//               className="flex items-center justify-between rounded-lg border border-slate-200 p-4 transition hover:border-slate-900"
+//             >
+//               <div className="flex items-center gap-3">
+//                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100">
+//                   <Plus size={17} />
+//                 </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="text-base font-semibold text-slate-900">
-            Quick actions
-          </h2>
+//                 <div>
+//                   <p className="text-sm font-medium text-slate-900">
+//                     Add product
+//                   </p>
 
-          <div className="mt-5 space-y-3">
-            <Link
-              to="/admin/products/new"
-              className="flex items-center justify-between rounded-lg border border-slate-200 p-4 transition hover:border-slate-900"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100">
-                  <Plus size={17} />
-                </div>
+//                   <p className="mt-0.5 text-xs text-slate-500">
+//                     Create a new catalog product
+//                   </p>
+//                 </div>
+//               </div>
 
-                <div>
-                  <p className="text-sm font-medium text-slate-900">
-                    Add product
-                  </p>
+//               <ArrowRight size={16} className="text-slate-400" />
+//             </Link>
 
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    Create a new catalog product
-                  </p>
-                </div>
-              </div>
+//             <Link
+//               to="/admin/products"
+//               className="flex items-center justify-between rounded-lg border border-slate-200 p-4 transition hover:border-slate-900"
+//             >
+//               <div className="flex items-center gap-3">
+//                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100">
+//                   <Package size={17} />
+//                 </div>
 
-              <ArrowRight
-                size={16}
-                className="text-slate-400"
-              />
-            </Link>
+//                 <div>
+//                   <p className="text-sm font-medium text-slate-900">
+//                     Manage products
+//                   </p>
 
-            <Link
-              to="/admin/products"
-              className="flex items-center justify-between rounded-lg border border-slate-200 p-4 transition hover:border-slate-900"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100">
-                  <Package size={17} />
-                </div>
+//                   <p className="mt-0.5 text-xs text-slate-500">
+//                     View and manage the catalog
+//                   </p>
+//                 </div>
+//               </div>
 
-                <div>
-                  <p className="text-sm font-medium text-slate-900">
-                    Manage products
-                  </p>
+//               <ArrowRight size={16} className="text-slate-400" />
+//             </Link>
+//           </div>
+//         </section>
 
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    View and manage the catalog
-                  </p>
-                </div>
-              </div>
+//         <section className="rounded-xl border border-slate-200 bg-white p-6">
+//           <h2 className="text-base font-semibold text-slate-900">Catalog</h2>
 
-              <ArrowRight
-                size={16}
-                className="text-slate-400"
-              />
-            </Link>
-          </div>
-        </section>
+//           <p className="mt-2 text-sm leading-6 text-slate-500">
+//             Categories, brands and collections will be managed from this
+//             administration area as those modules are added.
+//           </p>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="text-base font-semibold text-slate-900">
-            Catalog
-          </h2>
+//           <div className="mt-5 grid gap-3 sm:grid-cols-3">
+//             <PlaceholderLink label="Categories" />
+//             <PlaceholderLink label="Brands" />
+//             <PlaceholderLink label="Collections" />
+//           </div>
+//         </section>
+//       </div>
+//     </div>
+//   );
+// }
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Categories, brands and collections will be managed from
-            this administration area as those modules are added.
-          </p>
+// function StatCard({
+//   label,
+//   value,
+//   icon,
+// }: {
+//   label: string;
+//   value: string;
+//   icon: ReactNode;
+// }) {
+//   return (
+//     <div className="rounded-xl border border-slate-200 bg-white p-5">
+//       <div className="flex items-center justify-between">
+//         <span className="text-sm text-slate-500">{label}</span>
+//         <span className="text-slate-400">{icon}</span>
+//       </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <PlaceholderLink label="Categories" />
-            <PlaceholderLink label="Brands" />
-            <PlaceholderLink label="Collections" />
-          </div>
-        </section>
-      </div>
-    </div>
-  );
-}
+//       <p className="mt-4 text-2xl font-semibold text-slate-900">{value}</p>
+//     </div>
+//   );
+// }
 
-function StatCard({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon: ReactNode;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-slate-500">
-          {label}
-        </span>
-
-        <span className="text-slate-400">
-          {icon}
-        </span>
-      </div>
-
-      <p className="mt-4 text-2xl font-semibold text-slate-900">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function PlaceholderLink({ label }: { label: string }) {
-  return (
-    <div className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center">
-      <p className="text-xs font-medium text-slate-400">
-        {label}
-      </p>
-
-      <p className="mt-1 text-[11px] text-slate-400">
-        Coming soon
-      </p>
-    </div>
-  );
-}
+// function PlaceholderLink({ label }: { label: string }) {
+//   return (
+//     <div className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center">
+//       <p className="text-xs font-medium text-slate-400">{label}</p>
+//       <p className="mt-1 text-[11px] text-slate-400">Coming soon</p>
+//     </div>
+//   );
+// }

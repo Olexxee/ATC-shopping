@@ -43,7 +43,7 @@ import AddressesPage from "./pages/address/AddressesPage";
 // ============================================================
 
 import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
-import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
+// import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 
 import { AdminProductsPage } from "./pages/admin/AdminProductsPage";
 import { AdminCreateProductPage } from "./pages/admin/AdminCreateProductPage";
@@ -146,10 +146,10 @@ export function AppRoutes() {
               OVERVIEW
           -------------------------------------------------------- */}
 
-          <Route
+          {/* <Route
             path="dashboard"
             element={<AdminDashboardPage />}
-          />
+          /> */}
 
           {/* --------------------------------------------------------
               CATALOG
