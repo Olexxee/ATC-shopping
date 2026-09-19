@@ -1,4 +1,5 @@
-import {api} from "../../../lib/api";
+// src/features/admin/category/category.api.ts
+import { api } from "../../../lib/api";
 import type {
   CategoryFilters,
   CategoryFormValues,
@@ -8,6 +9,10 @@ import type {
 
 const CATEGORY_BASE = "/api/category";
 
+// ============================================================================
+// READ
+// ============================================================================
+
 export async function getAdminCategories(
   filters: CategoryFilters = {},
 ): Promise<CategoryListResponse> {
@@ -15,13 +20,17 @@ export async function getAdminCategories(
     params: {
       page: filters.page ?? 1,
       limit: filters.limit ?? 20,
+
       ...(filters.type && { type: filters.type }),
+
       ...(filters.isActive !== undefined && {
         isActive: filters.isActive,
       }),
+
       ...(filters.parentId !== undefined && {
         parentId: filters.parentId || "",
       }),
+
       ...(filters.search?.trim() && {
         search: filters.search.trim(),
       }),
@@ -31,24 +40,19 @@ export async function getAdminCategories(
   return response.data;
 }
 
-export async function getAdminCategory(): Promise<CategoryResponse> {
-  /*
-   * The backend currently exposes lookup by slug publicly,
-   * not GET /categories/:id.
-   *
-   * Therefore this function should not be used until we have
-   * an ID lookup endpoint or we obtain the category from the
-   * list cache.
-   */
-  throw new Error(
-    "Direct category-by-ID lookup is not currently supported by the API.",
-  );
+export async function getCategoryById(id: string): Promise<CategoryResponse> {
+  const response = await api.get(`${CATEGORY_BASE}/${id}`);
+  return response.data;
 }
 
-export async function createCategory(
+// ============================================================================
+// WRITE
+// ============================================================================
+
+function buildCategoryFormData(
   values: CategoryFormValues,
   image?: File | null,
-): Promise<CategoryResponse> {
+): FormData {
   const formData = new FormData();
 
   formData.append("name", values.name);
@@ -64,7 +68,17 @@ export async function createCategory(
     formData.append("image", image);
   }
 
-  const response = await api.post(CATEGORY_BASE, formData);
+  return formData;
+}
+
+export async function createCategory(
+  values: CategoryFormValues,
+  image?: File | null,
+): Promise<CategoryResponse> {
+  const response = await api.post(
+    CATEGORY_BASE,
+    buildCategoryFormData(values, image),
+  );
 
   return response.data;
 }
@@ -74,22 +88,10 @@ export async function updateCategory(
   values: CategoryFormValues,
   image?: File | null,
 ): Promise<CategoryResponse> {
-  const formData = new FormData();
-
-  formData.append("name", values.name);
-  formData.append("slug", values.slug);
-  formData.append("description", values.description);
-  formData.append("type", values.type);
-  formData.append("parentId", values.parentId);
-  formData.append("isActive", String(values.isActive));
-  formData.append("sortOrder", String(values.sortOrder));
-  formData.append("alt", values.alt);
-
-  if (image) {
-    formData.append("image", image);
-  }
-
-  const response = await api.patch(`${CATEGORY_BASE}/${id}`, formData);
+  const response = await api.patch(
+    `${CATEGORY_BASE}/${id}`,
+    buildCategoryFormData(values, image),
+  );
 
   return response.data;
 }
