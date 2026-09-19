@@ -7,8 +7,6 @@ import { ProductListingHeader } from "../../components/product/ProductListingHea
 import { ProductToolbar } from "../../components/product/ProductToolbar";
 import { useInfiniteProducts } from "../../features/products/products.queries";
 import { useProductDiscovery } from "../../features/products/useProductDiscovery";
-import { mapProductsToCards } from "../../mappers/product.mapper";
-
 
 export function ProductsPage() {
   const { state, params, setSort, clearFilters } = useProductDiscovery();
@@ -16,31 +14,17 @@ export function ProductsPage() {
   const productsQuery = useInfiniteProducts(params);
 
   const products = useMemo(
-    () => productsQuery.data?.pages.flatMap((page) => page.data.products) ?? [],
+    () => productsQuery.data?.pages.flatMap((page) => page.products) ?? [],
     [productsQuery.data],
   );
 
-  const productCards = useMemo(() => mapProductsToCards(products), [products]);
-
-  const totalCount = productsQuery.data?.pages[0]?.meta.total ?? 0;
+  const totalCount = productsQuery.data?.pages[0]?.pagination?.total ?? 0;
 
   const pageTitle = useMemo(() => {
-    if (state.search) {
-      return `Search results for "${state.search}"`;
-    }
-
-    if (state.isFeatured) {
-      return "Featured products";
-    }
-
-    if (state.isNew) {
-      return "New arrivals";
-    }
-
-    if (state.isBestSeller) {
-      return "Best sellers";
-    }
-
+    if (state.search) return `Search results for "${state.search}"`;
+    if (state.isFeatured) return "Featured products";
+    if (state.isNew) return "New arrivals";
+    if (state.isBestSeller) return "Best sellers";
     return "All products";
   }, [state.search, state.isFeatured, state.isNew, state.isBestSeller]);
 
@@ -87,7 +71,6 @@ export function ProductsPage() {
           ) : productsQuery.isError ? (
             <div className="py-12 text-center">
               <p className="text-sm text-red-600">Failed to load products.</p>
-
               <button
                 type="button"
                 onClick={() => productsQuery.refetch()}
@@ -96,8 +79,8 @@ export function ProductsPage() {
                 Try again
               </button>
             </div>
-          ) : productCards.length > 0 ? (
-            <ProductGrid products={productCards} />
+          ) : products.length > 0 ? (
+            <ProductGrid products={products} />
           ) : (
             <ProductEmptyState />
           )}

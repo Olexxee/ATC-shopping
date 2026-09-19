@@ -1,27 +1,29 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Package, Plus } from "lucide-react";
-
-import { useAdminProducts } from "../../features/admin/products/useAdminProducts";
+import type { ReactNode } from "react";
+import { useAdminProduct } from "../../features/admin/products/hooks/useAdminProduct";
 
 export function AdminDashboardPage() {
-  const productsQuery = useAdminProducts(1, 100);
+  const productsQuery = useAdminProduct(1, 100, {} as any);
 
-  const products = productsQuery.data?.data.products ?? [];
+  const products = (productsQuery as any)?.data?.data?.products ?? [];
 
-  const totalProducts = productsQuery.data?.meta.total ?? 0;
+  const totalProducts = (productsQuery as any)?.data?.meta?.total ?? 0;
+
 
   const activeProducts = products.filter(
-    (product) => product.status === "ACTIVE",
+    (product: { status: string }) => product.status === "ACTIVE",
   ).length;
 
   const draftProducts = products.filter(
-    (product) => product.status === "DRAFT",
+    (product: { status: string }) => product.status === "DRAFT",
   ).length;
 
   const lowStockProducts = products.filter(
-    (product) =>
+    (product: { variants?: Array<{ stock: number }> }) =>
+      Array.isArray(product.variants) &&
       product.variants.length > 0 &&
-      product.variants.every((variant) => variant.stock <= 5),
+      product.variants.every((variant: { stock: number }) => variant.stock <= 5),
   ).length;
 
   return (
@@ -43,28 +45,40 @@ export function AdminDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total products"
-          value={productsQuery.isLoading ? "—" : totalProducts.toLocaleString()}
+          value={
+            productsQuery.isLoading
+              ? "—"
+              : totalProducts.toLocaleString()
+          }
           icon={<Package size={18} />}
         />
 
         <StatCard
           label="Active"
           value={
-            productsQuery.isLoading ? "—" : activeProducts.toLocaleString()
+            productsQuery.isLoading
+              ? "—"
+              : activeProducts.toLocaleString()
           }
           icon={<Package size={18} />}
         />
 
         <StatCard
           label="Drafts"
-          value={productsQuery.isLoading ? "—" : draftProducts.toLocaleString()}
+          value={
+            productsQuery.isLoading
+              ? "—"
+              : draftProducts.toLocaleString()
+          }
           icon={<Package size={18} />}
         />
 
         <StatCard
           label="Low stock"
           value={
-            productsQuery.isLoading ? "—" : lowStockProducts.toLocaleString()
+            productsQuery.isLoading
+              ? "—"
+              : lowStockProducts.toLocaleString()
           }
           icon={<Package size={18} />}
         />
@@ -97,7 +111,10 @@ export function AdminDashboardPage() {
                 </div>
               </div>
 
-              <ArrowRight size={16} className="text-slate-400" />
+              <ArrowRight
+                size={16}
+                className="text-slate-400"
+              />
             </Link>
 
             <Link
@@ -120,17 +137,22 @@ export function AdminDashboardPage() {
                 </div>
               </div>
 
-              <ArrowRight size={16} className="text-slate-400" />
+              <ArrowRight
+                size={16}
+                className="text-slate-400"
+              />
             </Link>
           </div>
         </section>
 
         <section className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="text-base font-semibold text-slate-900">Catalog</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            Catalog
+          </h2>
 
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Categories, brands and collections will be managed from this
-            administration area as those modules are added.
+            Categories, brands and collections will be managed from
+            this administration area as those modules are added.
           </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -151,17 +173,23 @@ function StatCard({
 }: {
   label: string;
   value: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-slate-500">{label}</span>
+        <span className="text-sm text-slate-500">
+          {label}
+        </span>
 
-        <span className="text-slate-400">{icon}</span>
+        <span className="text-slate-400">
+          {icon}
+        </span>
       </div>
 
-      <p className="mt-4 text-2xl font-semibold text-slate-900">{value}</p>
+      <p className="mt-4 text-2xl font-semibold text-slate-900">
+        {value}
+      </p>
     </div>
   );
 }
@@ -169,9 +197,13 @@ function StatCard({
 function PlaceholderLink({ label }: { label: string }) {
   return (
     <div className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center">
-      <p className="text-xs font-medium text-slate-400">{label}</p>
+      <p className="text-xs font-medium text-slate-400">
+        {label}
+      </p>
 
-      <p className="mt-1 text-[11px] text-slate-400">Coming soon</p>
+      <p className="mt-1 text-[11px] text-slate-400">
+        Coming soon
+      </p>
     </div>
   );
 }

@@ -1,47 +1,93 @@
+export type ProductStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
+
+export type ProductFulfillmentType =
+  | "LOCAL"
+  | "IMPORT"
+  | "PREORDER"
+  | "DIGITAL";
+
+export type ProductShippingType =
+  | "LOCAL"
+  | "IMPORT"
+  | "SEA"
+  | "AIR"
+  | "DIGITAL";
+
+export interface ProductBrandMedia {
+  id: string;
+  url: string;
+  publicId?: string;
+  isPrimary?: boolean;
+  sortOrder?: number;
+}
+
+export interface ProductBrand {
+  id: string;
+  name: string;
+  slug: string;
+  media: ProductBrandMedia[];
+}
+
+export interface ProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+  type?: string;
+}
+
+export interface ProductCollection {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface ProductReview {
+  id: string;
+  rating: number;
+  comment: string | null;
+  helpfulCount?: number;
+  createdAt: string;
+  user?: { id: string; fullName: string };
+}
+
 export interface ProductMedia {
   id: string;
   variantId: string;
   url: string;
   publicId: string;
-  mimeType: string;
+  mimeType: string | null;
+  bytes: number | null;
+  format: string | null;
   width: number | null;
   height: number | null;
-  bytes: number;
-  format: string;
   alt: string | null;
   isPrimary: boolean;
   sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ProductReview {
-  rating: number;
 }
 
 export interface ProductVariant {
   id: string;
   productId: string;
-  sku: string;
 
+  sku: string | null;
   color: string | null;
   size: string | null;
 
-  weight: string;
-  price: string;
-  compareAtPrice: string | null;
-
+  /** Prisma Decimal — serialized as string over JSON. */
+  weight: number | string;
+  price: number | string;
+  compareAtPrice: number | string | null;
   stock: number;
 
-  fulfillmentType: "LOCAL" | "IMPORT" | "PREORDER" | "DIGITAL";
+  fulfillmentType: ProductFulfillmentType;
 
-  length: string | null;
-  width: string | null;
-  height: string | null;
+  length: number | string | null;
+  width: number | string | null;
+  height: number | string | null;
 
-  actualWeight: string;
+  actualWeight: number | string;
 
-  shippingType: "LOCAL" | "IMPORT" | "SEA" | "AIR";
+  shippingType: ProductShippingType;
 
   isActive: boolean;
 
@@ -52,14 +98,19 @@ export interface ProductVariant {
   updatedAt: string;
 
   media: ProductMedia[];
-  reviews: ProductReview[];
+  reviews?: ProductReview[];
+}
+
+export interface ProductPriceRange {
+  min: number | null;
+  max: number | null;
 }
 
 export interface Product {
   id: string;
   name: string;
   slug: string;
-  description?: string | null;
+  description: string | null;
 
   brandId: string | null;
   categoryId: string;
@@ -69,38 +120,23 @@ export interface Product {
   isNew: boolean;
   isBestSeller: boolean;
 
-  status: "DRAFT" | "ACTIVE" | "ARCHIVED";
+  status: ProductStatus;
 
   metadata: Record<string, unknown> | null;
 
   createdAt: string;
   updatedAt: string;
 
-  brand: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
-
-  category: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
-
-  collection: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
+  brand: ProductBrand | null;
+  category: ProductCategory;
+  collection: ProductCollection | null;
 
   variants: ProductVariant[];
 
-  avgRating: number;
-  totalReviews: number;
+  _count?: { variants: number };
 
-  priceRange: {
-    min: number | null;
-    max: number | null;
-  } | null;
+  /** Present only on list / card responses (productDb.addComputedFields). */
+  avgRating?: number;
+  totalReviews?: number;
+  priceRange?: ProductPriceRange;
 }

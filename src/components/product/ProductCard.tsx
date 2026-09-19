@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import type { ProductCardData } from "../../types/product-ui";
+import { Link, useNavigate } from "react-router-dom";
+import type { StorefrontCard } from "../../api/product/product.contract";
 import {
   useAddToWishlist,
   useRemoveFromWishlist,
 } from "../../features/wishlist/wishlist.mutations";
 
 interface ProductCardProps {
-  product: ProductCardData;
+  product: StorefrontCard;
   isAuthenticated: boolean;
   isInWishlist: boolean;
   wishlistLoading?: boolean;
@@ -34,51 +34,49 @@ export function ProductCard({
     setOptimisticWishlist(isInWishlist);
   }, [isInWishlist]);
 
-  const handleWishlistClick = () => {
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+
     if (!isAuthenticated) {
       navigate("/auth/login", {
-        state: {
-          from: `/products/${product.slug}`,
-        },
+        state: { from: `/products/${product.slug}` },
       });
-
       return;
     }
 
     const previousState = optimisticWishlist;
     const nextState = !previousState;
 
-    // Update the UI immediately.
     setOptimisticWishlist(nextState);
 
     if (nextState) {
       addToWishlistMutation.mutate(
-        {
-          productId: product.id,
-        },
-        {
-          onError: () => {
-            // Roll back if the API request fails.
-            setOptimisticWishlist(previousState);
-          },
-        },
+        { productId: product.id },
+        { onError: () => setOptimisticWishlist(previousState) },
       );
-
       return;
     }
 
     removeFromWishlistMutation.mutate(product.id, {
-      onError: () => {
-        // Roll back if the API request fails.
-        setOptimisticWishlist(previousState);
-      },
+      onError: () => setOptimisticWishlist(previousState),
     });
   };
+
+  // Price comes ONLY from priceRange. No fallback to a variant.
+  const price = product.priceRange.min;
+
+  // Compare-at shown only when a real markdown exists.
+  const compareAt = (() => {
+    const candidates = product.variants
+      .map((v) => v.compareAtPrice)
+      .filter((c): c is number => c !== null && c > price);
+    return candidates.length ? Math.max(...candidates) : null;
+  })();
 
   return (
     <article className="group min-w-0">
       <div className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100">
-        <a href={`/products/${product.slug}`} className="block h-full">
+        <Link to={`/products/${product.slug}`} className="block h-full">
           {product.image ? (
             <img
               src={product.image}
@@ -93,7 +91,7 @@ export function ProductCard({
               </span>
             </div>
           )}
-        </a>
+        </Link>
 
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           {product.isNew && (
@@ -140,32 +138,29 @@ export function ProductCard({
           </p>
         )}
 
-        <a
-          href={`/products/${product.slug}`}
+        <Link
+          to={`/products/${product.slug}`}
           className="mt-1 block truncate text-sm font-medium text-neutral-950 hover:underline"
         >
           {product.name}
-        </a>
+        </Link>
 
         <div className="mt-2 flex items-center gap-2">
           <span className="text-sm font-semibold text-neutral-950">
-            ₦{product.price.toLocaleString()}
+            ₦{price.toLocaleString()}
           </span>
-
-          {product.compareAtPrice && product.compareAtPrice > product.price && (
+          {compareAt && compareAt > price && (
             <span className="text-sm text-neutral-400 line-through">
-              ₦{product.compareAtPrice.toLocaleString()}
+              ₦{compareAt.toLocaleString()}
             </span>
           )}
         </div>
 
-        {product.hasVariants && (
+        {product.variants.length > 1 && (
           <div className="mt-2">
             <p className="text-xs text-neutral-500">
-              {product.variantCount}{" "}
-              {product.variantCount === 1 ? "variant" : "variants"}
+              {product.variants.length} variants
             </p>
-
             {product.colors.length > 0 && (
               <p className="mt-0.5 truncate text-xs text-neutral-400">
                 {product.colors.join(" · ")}

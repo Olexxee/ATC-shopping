@@ -47,25 +47,30 @@ import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 
 import { AdminProductsPage } from "./pages/admin/AdminProductsPage";
 import { AdminCreateProductPage } from "./pages/admin/AdminCreateProductPage";
+import { AdminEditProductPage } from "./pages/admin/AdminEditProductPage";
 
 import { AdminCategoriesPage } from "./pages/admin/AdminCategoriesPage";
 import { AdminCreateCategoryPage } from "./pages/admin/AdminCreateCategoryPage";
 import { AdminEditCategoryPage } from "./pages/admin/AdminEditCategoryPage";
 
-import AdminFulfillmentsPage from "./pages/admin/AdminFulfillmentsPage";
-import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import { AdminBrandsPage } from "./pages/admin/AdminBrandsPage";
 import { AdminCreateBrandPage } from "./pages/admin/AdminCreateBrandPage";
 import { AdminEditBrandPage } from "./pages/admin/AdminEditBrandPage";
+
+import AdminFulfillmentsPage from "./pages/admin/AdminFulfillmentsPage";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 
 import { AdminWarehousesPage } from "./pages/admin/AdminWarehousesPage";
 import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
 import { AdminShippingPage } from "./pages/admin/AdminShippingPage";
 
-import { AdminRoute } from "./routes/AdminRoute";
-import { AdminLayout } from "./components/admin/AdminLayout";
+// ============================================================
+// ROUTE GUARDS & LAYOUT
+// ============================================================
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { AdminRoute } from "./routes/AdminRoute";
+import { AdminLayout } from "./components/admin/AdminLayout";
 
 // ============================================================
 // ROUTES
@@ -101,7 +106,10 @@ export function AppRoutes() {
 
         <Route path="/addresses" element={<AddressesPage />} />
 
-        <Route path="/payment/callback" element={<PaymentCallbackPage />} />
+        <Route
+          path="/payment/callback"
+          element={<PaymentCallbackPage />}
+        />
       </Route>
 
       {/* ============================================================
@@ -123,7 +131,10 @@ export function AppRoutes() {
           ADMIN AUTH
       ============================================================ */}
 
-      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route
+        path="/admin/login"
+        element={<AdminLoginPage />}
+      />
 
       {/* ============================================================
           PROTECTED ADMIN
@@ -135,30 +146,59 @@ export function AppRoutes() {
               OVERVIEW
           -------------------------------------------------------- */}
 
-          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route
+            path="dashboard"
+            element={<AdminDashboardPage />}
+          />
 
           {/* --------------------------------------------------------
               CATALOG
           -------------------------------------------------------- */}
 
-          <Route path="products" element={<AdminProductsPage />} />
+          <Route
+            path="products"
+            element={<AdminProductsPage />}
+          />
 
-          <Route path="products/new" element={<AdminCreateProductPage />} />
+          <Route
+            path="products/new"
+            element={<AdminCreateProductPage />}
+          />
 
-          <Route path="categories" element={<AdminCategoriesPage />} />
+          <Route
+            path="products/:id/edit"
+            element={<AdminEditProductPage />}
+          />
 
-          <Route path="categories/new" element={<AdminCreateCategoryPage />} />
+          <Route
+            path="categories"
+            element={<AdminCategoriesPage />}
+          />
+
+          <Route
+            path="categories/new"
+            element={<AdminCreateCategoryPage />}
+          />
 
           <Route
             path="categories/:id/edit"
             element={<AdminEditCategoryPage />}
           />
 
-          <Route path="brands" element={<AdminBrandsPage />} />
+          <Route
+            path="brands"
+            element={<AdminBrandsPage />}
+          />
 
-          <Route path="brands/new" element={<AdminCreateBrandPage />} />
+          <Route
+            path="brands/new"
+            element={<AdminCreateBrandPage />}
+          />
 
-          <Route path="brands/:id/edit" element={<AdminEditBrandPage />} />
+          <Route
+            path="brands/:id/edit"
+            element={<AdminEditBrandPage />}
+          />
 
           <Route
             path="collections"
@@ -174,23 +214,39 @@ export function AppRoutes() {
               SALES
           -------------------------------------------------------- */}
 
-          <Route path="orders" element={<AdminOrdersPage />} />
+          <Route
+            path="orders"
+            element={<AdminOrdersPage />}
+          />
 
           <Route
             path="customers"
             element={<AdminComingSoonPage title="Customers" />}
           />
-          <Route path="fulfillments" element={<AdminFulfillmentsPage />} />
+
+          <Route
+            path="fulfillments"
+            element={<AdminFulfillmentsPage />}
+          />
 
           {/* --------------------------------------------------------
               SYSTEM
           -------------------------------------------------------- */}
 
-          <Route path="settings" element={<AdminSettingsPage />} />
+          <Route
+            path="settings"
+            element={<AdminSettingsPage />}
+          />
 
-          <Route path="shipping" element={<AdminShippingPage />} />
+          <Route
+            path="shipping"
+            element={<AdminShippingPage />}
+          />
 
-          <Route path="warehouses" element={<AdminWarehousesPage />} />
+          <Route
+            path="warehouses"
+            element={<AdminWarehousesPage />}
+          />
         </Route>
       </Route>
     </Routes>
@@ -201,14 +257,20 @@ export function AppRoutes() {
 // ADMIN COMING SOON
 // ============================================================
 
-function AdminComingSoonPage({ title }: { title: string }) {
+function AdminComingSoonPage({
+  title,
+}: {
+  title: string;
+}) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-8">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
         Administration
       </p>
 
-      <h1 className="mt-2 text-xl font-semibold text-slate-900">{title}</h1>
+      <h1 className="mt-2 text-xl font-semibold text-slate-900">
+        {title}
+      </h1>
 
       <p className="mt-2 text-sm text-slate-500">
         This section is not available yet.

@@ -9,39 +9,30 @@ import { ProductToolbar } from "../../components/product/ProductToolbar";
 import { useCategoryBySlug } from "../../features/categories/categories.queries";
 import { useInfiniteProducts } from "../../features/products/products.queries";
 import { useProductDiscovery } from "../../features/products/useProductDiscovery";
-import { mapProductsToCards } from "../../mappers/product.mapper";
-
-
-
-
 
 export function CategoryPage() {
   const { slug = "" } = useParams();
   const categoryQuery = useCategoryBySlug(slug);
   const category = categoryQuery.data;
   const { state, setSort, clearFilters } = useProductDiscovery();
+
   const productsQuery = useInfiniteProducts({
     categoryId: category?.id,
     sortBy:
       state.sort === "newest"
         ? "createdAt"
-        : state.sort.startsWith("price")
-          ? "price"
-          : state.sort.startsWith("name")
-            ? "name"
-            : undefined,
-    sortOrder:
-      state.sort === "price-asc" || state.sort === "name-asc" ? "asc" : "desc",
+        : state.sort.startsWith("name")
+          ? "name"
+          : undefined,
+    sortOrder: state.sort === "name-asc" ? "asc" : "desc",
   });
 
   const products = useMemo(
-    () => productsQuery.data?.pages.flatMap((page) => page.data.products) ?? [],
+    () => productsQuery.data?.pages.flatMap((page) => page.products) ?? [],
     [productsQuery.data],
   );
 
-  const productCards = useMemo(() => mapProductsToCards(products), [products]);
-
-  const totalCount = productsQuery.data?.pages[0]?.meta.total ?? 0;
+  const totalCount = productsQuery.data?.pages[0]?.pagination?.total ?? 0;
 
   if (categoryQuery.isLoading) {
     return (
@@ -161,8 +152,8 @@ export function CategoryPage() {
                 Try again
               </button>
             </div>
-          ) : productCards.length ? (
-            <ProductGrid products={productCards} />
+          ) : products.length ? (
+            <ProductGrid products={products} />
           ) : (
             <ProductEmptyState />
           )}

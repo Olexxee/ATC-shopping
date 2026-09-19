@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { Container } from "../layout/Container";
 import { Section } from "../layout/Section";
 import { ProductGrid } from "../product/ProductGrid";
-import type { ProductCardData } from "../../types/product-ui";
+import type { StorefrontCard } from "../../api/product/product.contract";
 
 interface FeaturedProductsSectionProps {
-  products: ProductCardData[];
+  products: StorefrontCard[];
 }
 
 export function FeaturedProductsSection({

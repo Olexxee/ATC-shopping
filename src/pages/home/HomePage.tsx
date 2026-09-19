@@ -8,7 +8,6 @@ import { NewArrivalsSection } from "../../components/home/NewArrivalsSection";
 import { BestSellersSection } from "../../components/home/BestSellersSection";
 import { Footer } from "../../components/footer/Footer";
 import { useHomepageData } from "../../features/home/useHomepageProducts";
-import { mapProductsToCards } from "../../mappers/product.mapper";
 import { mapCategoriesToCards } from "../../mappers/category.mapper";
 import { mapBrandsToCards } from "../../mappers/brand.mapper";
 
@@ -16,16 +15,8 @@ export function HomePage() {
   const { hero, categories, brands, featured, newArrivals, bestSellers } =
     useHomepageData();
 
-
   const categoryCards = mapCategoriesToCards(categories);
-
   const brandCards = mapBrandsToCards(brands);
-
-  const featuredProducts = mapProductsToCards(featured);
-
-  const newArrivalProducts = mapProductsToCards(newArrivals);
-
-  const bestSellerProducts = mapProductsToCards(bestSellers);
 
   return (
     <div className="min-h-screen bg-white">
@@ -36,15 +27,15 @@ export function HomePage() {
 
         <CategorySection categories={categoryCards} />
 
-        <FeaturedProductsSection products={featuredProducts} />
+        <FeaturedProductsSection products={featured} />
 
         <ImportationBanner />
 
         <BrandsSection brands={brandCards} />
 
-        <NewArrivalsSection products={newArrivalProducts} />
+        <NewArrivalsSection products={newArrivals} />
 
-        <BestSellersSection products={bestSellerProducts} />
+        <BestSellersSection products={bestSellers} />
       </main>
 
       <Footer />

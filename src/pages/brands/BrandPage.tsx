@@ -7,13 +7,11 @@ import { ProductInfiniteLoader } from "../../components/product/ProductInfiniteL
 import { useBrandBySlug } from "../../features/brands/brands.queries";
 import { useInfiniteProducts } from "../../features/products/products.queries";
 import { mapBrandToCard } from "../../mappers/brand.mapper";
-import { mapProductsToCards } from "../../mappers/product.mapper";
 
 export function BrandPage() {
   const { slug } = useParams<{ slug: string }>();
 
   const brandQuery = useBrandBySlug(slug ?? "");
-
   const brand = brandQuery.data;
 
   const productsQuery = useInfiniteProducts({
@@ -21,16 +19,10 @@ export function BrandPage() {
     limit: 20,
   });
 
-  const brandCard = brand
-    ? mapBrandToCard(brand)
-    : null;
+  const brandCard = brand ? mapBrandToCard(brand) : null;
 
   const products =
-    productsQuery.data?.pages.flatMap(
-      (page) => page.data.products,
-    ) ?? [];
-
-  const productCards = mapProductsToCards(products);
+    productsQuery.data?.pages.flatMap((page) => page.products) ?? [];
 
   if (brandQuery.isLoading) {
     return (
@@ -110,9 +102,7 @@ export function BrandPage() {
 
             <span className="mx-2">/</span>
 
-            <span className="text-neutral-900">
-              {brandCard.name}
-            </span>
+            <span className="text-neutral-900">{brandCard.name}</span>
           </nav>
 
           {/* Brand header */}
@@ -150,9 +140,7 @@ export function BrandPage() {
               {brandCard.productCount !== undefined && (
                 <p className="mt-3 text-sm text-neutral-500">
                   {brandCard.productCount}{" "}
-                  {brandCard.productCount === 1
-                    ? "product"
-                    : "products"}
+                  {brandCard.productCount === 1 ? "product" : "products"}
                 </p>
               )}
             </div>
@@ -187,20 +175,14 @@ export function BrandPage() {
                     Try again
                   </button>
                 </div>
-              ) : productCards.length ? (
+              ) : products.length ? (
                 <>
-                  <ProductGrid products={productCards} />
+                  <ProductGrid products={products} />
 
                   <ProductInfiniteLoader
-                    hasNextPage={
-                      productsQuery.hasNextPage
-                    }
-                    isFetchingNextPage={
-                      productsQuery.isFetchingNextPage
-                    }
-                    onLoadMore={() =>
-                      productsQuery.fetchNextPage()
-                    }
+                    hasNextPage={Boolean(productsQuery.hasNextPage)}
+                    isFetchingNextPage={productsQuery.isFetchingNextPage}
+                    onLoadMore={() => productsQuery.fetchNextPage()}
                   />
                 </>
               ) : (

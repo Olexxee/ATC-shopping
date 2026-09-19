@@ -1,11 +1,11 @@
 import { useMemo } from "react";
-import type { ProductCardData } from "../../types/product-ui";
+import type { StorefrontCard } from "../../api/product/product.contract";
 import { useCurrentUser } from "../../features/auth/auth.queries";
 import { useBatchWishlistCheck } from "../../features/wishlist/wishlist.queries";
 import { ProductCard } from "./ProductCard";
 
 interface ProductGridProps {
-  products: ProductCardData[];
+  products: StorefrontCard[];
 }
 
 export function ProductGrid({ products }: ProductGridProps) {
