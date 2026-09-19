@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { AdminVariant } from "../../../../api/product.contract";
+import type { AdminVariant } from "../../../../api/product/product.contract";
 import { useArchiveVariant } from "../hooks/useArchiveVariant";
 import { useCreateVariant } from "../hooks/useCreateVariant";
 import { VariantRow } from "./VariantRow";
@@ -26,6 +26,7 @@ export function VariantList({ productId, variants }: Props) {
             Each variant saves independently.
           </p>
         </div>
+        
         <button
           type="button"
           onClick={() => setAdding(true)}

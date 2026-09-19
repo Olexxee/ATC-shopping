@@ -3,8 +3,6 @@ import type { GetProductsParams } from "../../api/product/products.api";
 export type ProductSortValue =
   | "recommended"
   | "newest"
-  | "price-asc"
-  | "price-desc"
   | "name-asc"
   | "name-desc";
 
@@ -33,30 +31,10 @@ export const PRODUCT_SORT_OPTIONS: {
   value: ProductSortValue;
   label: string;
 }[] = [
-  {
-    value: "recommended",
-    label: "Recommended",
-  },
-  {
-    value: "newest",
-    label: "Newest",
-  },
-  {
-    value: "price-asc",
-    label: "Price: Low to High",
-  },
-  {
-    value: "price-desc",
-    label: "Price: High to Low",
-  },
-  {
-    value: "name-asc",
-    label: "Name: A–Z",
-  },
-  {
-    value: "name-desc",
-    label: "Name: Z–A",
-  },
+  { value: "recommended", label: "Recommended" },
+  { value: "newest", label: "Newest" },
+  { value: "name-asc", label: "Name: A–Z" },
+  { value: "name-desc", label: "Name: Z–A" },
 ];
 
 export function parseBoolean(value: string | null): boolean | undefined {
@@ -64,12 +42,9 @@ export function parseBoolean(value: string | null): boolean | undefined {
 }
 
 export function parseNumber(value: string | null): number | undefined {
-  if (!value) {
-    return undefined;
-  }
+  if (!value) return undefined;
 
   const number = Number(value);
-
   return Number.isFinite(number) ? number : undefined;
 }
 
@@ -86,19 +61,14 @@ export function parseProductListingSearch(
     search: searchParams.get("search") || undefined,
 
     categoryId: searchParams.get("categoryId") || undefined,
-
     brandId: searchParams.get("brandId") || undefined,
-
     collectionId: searchParams.get("collectionId") || undefined,
 
     isFeatured: parseBoolean(searchParams.get("isFeatured")),
-
     isNew: parseBoolean(searchParams.get("isNew")),
-
     isBestSeller: parseBoolean(searchParams.get("isBestSeller")),
 
     minPrice: parseNumber(searchParams.get("minPrice")),
-
     maxPrice: parseNumber(searchParams.get("maxPrice")),
 
     sort: validSort
@@ -114,55 +84,21 @@ export function listingStateToParams(
     limit: 20,
   };
 
-  if (state.search) {
-    params.search = state.search;
-  }
+  if (state.search) params.search = state.search;
+  if (state.categoryId) params.categoryId = state.categoryId;
+  if (state.brandId) params.brandId = state.brandId;
+  if (state.collectionId) params.collectionId = state.collectionId;
 
-  if (state.categoryId) {
-    params.categoryId = state.categoryId;
-  }
+  if (state.isFeatured) params.isFeatured = true;
+  if (state.isNew) params.isNew = true;
+  if (state.isBestSeller) params.isBestSeller = true;
 
-  if (state.brandId) {
-    params.brandId = state.brandId;
-  }
-
-  if (state.collectionId) {
-    params.collectionId = state.collectionId;
-  }
-
-  if (state.isFeatured) {
-    params.isFeatured = true;
-  }
-
-  if (state.isNew) {
-    params.isNew = true;
-  }
-
-  if (state.isBestSeller) {
-    params.isBestSeller = true;
-  }
-
-  if (state.minPrice !== undefined) {
-    params.minPrice = state.minPrice;
-  }
-
-  if (state.maxPrice !== undefined) {
-    params.maxPrice = state.maxPrice;
-  }
+  if (state.minPrice !== undefined) params.minPrice = state.minPrice;
+  if (state.maxPrice !== undefined) params.maxPrice = state.maxPrice;
 
   switch (state.sort) {
     case "newest":
       params.sortBy = "createdAt";
-      params.sortOrder = "desc";
-      break;
-
-    case "price-asc":
-      params.sortBy = "price";
-      params.sortOrder = "asc";
-      break;
-
-    case "price-desc":
-      params.sortBy = "price";
       params.sortOrder = "desc";
       break;
 
@@ -187,33 +123,14 @@ export function listingStateToParams(
 export function updateProductListingUrl(state: ProductListingState): void {
   const params = new URLSearchParams();
 
-  if (state.search) {
-    params.set("search", state.search);
-  }
+  if (state.search) params.set("search", state.search);
+  if (state.categoryId) params.set("categoryId", state.categoryId);
+  if (state.brandId) params.set("brandId", state.brandId);
+  if (state.collectionId) params.set("collectionId", state.collectionId);
 
-  if (state.categoryId) {
-    params.set("categoryId", state.categoryId);
-  }
-
-  if (state.brandId) {
-    params.set("brandId", state.brandId);
-  }
-
-  if (state.collectionId) {
-    params.set("collectionId", state.collectionId);
-  }
-
-  if (state.isFeatured) {
-    params.set("isFeatured", "true");
-  }
-
-  if (state.isNew) {
-    params.set("isNew", "true");
-  }
-
-  if (state.isBestSeller) {
-    params.set("isBestSeller", "true");
-  }
+  if (state.isFeatured) params.set("isFeatured", "true");
+  if (state.isNew) params.set("isNew", "true");
+  if (state.isBestSeller) params.set("isBestSeller", "true");
 
   if (state.minPrice !== undefined) {
     params.set("minPrice", String(state.minPrice));
@@ -229,5 +146,9 @@ export function updateProductListingUrl(state: ProductListingState): void {
 
   const query = params.toString();
 
-  window.history.pushState({}, "", query ? `/products?${query}` : "/products");
+  window.history.pushState(
+    {},
+    "",
+    query ? `/products?${query}` : "/products",
+  );
 }

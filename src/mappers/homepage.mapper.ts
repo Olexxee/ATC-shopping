@@ -1,18 +1,14 @@
-import type { Product } from "../types/product.types";
 import type { BrandCardData } from "../types/brand-ui";
 import type { CategoryCardData } from "../types/category-ui";
-import type { HomepageViewData } from "../types/homepage-ui";
 import type { HeroSlideApi } from "../types/business-config";
-import { mapProductsToCards } from "./product.mapper";
+import type { StorefrontCard } from "../api/product/product.contract";
 import { mapHeroSlides } from "./hero.mapper";
 
 function mapCategory(category: {
   id: string;
   name: string;
   slug: string;
-  image?: {
-    url: string;
-  } | null;
+  image?: { url: string } | null;
   productCount?: number;
 }): CategoryCardData {
   return {
@@ -30,9 +26,7 @@ function mapBrand(brand: {
   slug: string;
   logo?: string | null;
   description?: string | null;
-  _count?: {
-    products: number;
-  };
+  _count?: { products: number };
 }): BrandCardData {
   return {
     id: brand.id,
@@ -46,27 +40,22 @@ function mapBrand(brand: {
 
 interface HomepageSourceData {
   hero?: HeroSlideApi[];
-
   categories?: Parameters<typeof mapCategory>[0][];
   brands?: Parameters<typeof mapBrand>[0][];
-
-  featured?: Product[];
-  newArrivals?: Product[];
-  bestSellers?: Product[];
+  featured?: StorefrontCard[];
+  newArrivals?: StorefrontCard[];
+  bestSellers?: StorefrontCard[];
 }
 
-export function mapHomepage(source: HomepageSourceData): HomepageViewData {
+export function mapHomepage(source: HomepageSourceData) {
   return {
     hero: mapHeroSlides(source.hero ?? []),
-
     categories: (source.categories ?? []).map(mapCategory),
-
     brands: (source.brands ?? []).map(mapBrand),
 
-    featuredProducts: mapProductsToCards(source.featured ?? []),
-
-    newArrivals: mapProductsToCards(source.newArrivals ?? []),
-
-    bestSellers: mapProductsToCards(source.bestSellers ?? []),
+    // Already StorefrontCard[] from the API — pass through.
+    featuredProducts: source.featured ?? [],
+    newArrivals: source.newArrivals ?? [],
+    bestSellers: source.bestSellers ?? [],
   };
 }

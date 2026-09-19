@@ -5,7 +5,6 @@ import { useAdminProduct } from "../../features/admin/products/hooks/useAdminPro
 
 export function AdminEditProductPage() {
   const { id } = useParams<{ id: string }>();
-
   const navigate = useNavigate();
 
   const {
@@ -108,15 +107,7 @@ export function AdminEditProductPage() {
         </div>
       </div>
 
-      <ProductEditor
-        mode="edit"
-        product={product}
-        onSuccess={() => {
-          navigate(`/admin/products/${product.id}/edit`, {
-            replace: true,
-          });
-        }}
-      />
+      <ProductEditor product={product} />
     </div>
   );
 }
