@@ -1,13 +1,28 @@
+import { useState } from "react";
 import { ArrowLeft, CheckCircle2, Package } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useOrder } from "../../features/order/order.queries";
+import { useMyReviews } from "../../features/reviews/review.queries";
+import { ReviewForm } from "../../components/review/ReviewForm";
 import type { Order } from "../../features/order/order.types";
-
 
 export default function OrderPage() {
   const { id } = useParams<{ id: string }>();
 
-  const { data: response, isLoading, isError } = useOrder(id);
+  const {
+    data: response,
+    isLoading,
+    isError,
+  } = useOrder(id);
+
+  const {
+    data: reviewsResponse,
+    isLoading: reviewsLoading,
+  } = useMyReviews(1, 100);
+
+  const [reviewingVariantId, setReviewingVariantId] = useState<
+    string | null
+  >(null);
 
   if (isLoading) {
     return <OrderPageSkeleton />;
@@ -23,6 +38,15 @@ export default function OrderPage() {
   }
 
   const order = response.data;
+
+  const canReview =
+    order.status === "DELIVERED" ||
+    order.status === "COMPLETED";
+
+  const reviews = reviewsResponse?.data ?? [];
+
+  const hasReviewedVariant = (variantId: string) =>
+    reviews.some((review) => review.variantId === variantId);
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -62,11 +86,33 @@ export default function OrderPage() {
         <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-6">
             <section className="rounded-2xl border border-gray-200 bg-white p-6">
-              <h2 className="text-lg font-semibold text-gray-900">Items</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Items
+              </h2>
 
               <div className="mt-5 divide-y divide-gray-100">
                 {order.items.map((item) => (
-                  <OrderItemRow key={item.id} item={item} />
+                  <OrderItemRow
+                    key={item.id}
+                    item={item}
+                    orderId={order.id}
+                    orderStatus={order.status}
+                    canReview={canReview}
+                    hasReviewed={hasReviewedVariant(item.variant.id)}
+                    reviewsLoading={reviewsLoading}
+                    isReviewing={
+                      reviewingVariantId === item.variant.id
+                    }
+                    onStartReview={() =>
+                      setReviewingVariantId(item.variant.id)
+                    }
+                    onCancelReview={() =>
+                      setReviewingVariantId(null)
+                    }
+                    onReviewSuccess={() => {
+                      setReviewingVariantId(null);
+                    }}
+                  />
                 ))}
               </div>
             </section>
@@ -85,13 +131,17 @@ export default function OrderPage() {
 
                 <p>
                   {order.shippingCity}
-                  {order.shippingState ? `, ${order.shippingState}` : ""}
+                  {order.shippingState
+                    ? `, ${order.shippingState}`
+                    : ""}
                 </p>
 
                 <p>{order.shippingCountry}</p>
 
                 {order.customerPhone && (
-                  <p className="mt-2">{order.customerPhone}</p>
+                  <p className="mt-2">
+                    {order.customerPhone}
+                  </p>
                 )}
               </div>
             </section>
@@ -102,7 +152,9 @@ export default function OrderPage() {
                   Order notes
                 </h2>
 
-                <p className="mt-3 text-sm text-gray-600">{order.notes}</p>
+                <p className="mt-3 text-sm text-gray-600">
+                  {order.notes}
+                </p>
               </section>
             )}
           </div>
@@ -116,45 +168,104 @@ export default function OrderPage() {
   );
 }
 
-function OrderItemRow({ item }: { item: Order["items"][number] }) {
+interface OrderItemRowProps {
+  item: Order["items"][number];
+  orderId: string;
+  orderStatus: string;
+  canReview: boolean;
+  hasReviewed: boolean;
+  reviewsLoading: boolean;
+  isReviewing: boolean;
+  onStartReview: () => void;
+  onCancelReview: () => void;
+  onReviewSuccess: () => void;
+}
+
+function OrderItemRow({
+  item,
+  orderId,
+  canReview,
+  hasReviewed,
+  reviewsLoading,
+  isReviewing,
+  onStartReview,
+  onCancelReview,
+  onReviewSuccess,
+}: OrderItemRowProps) {
   const image =
-    item.variant.media.find((media: { isPrimary: any; }) => media.isPrimary)?.url ??
-    item.variant.media[0]?.url;
+    item.variant.media.find(
+      (media) => media.isPrimary,
+    )?.url ?? item.variant.media[0]?.url;
 
   const unitPrice = Number(item.unitPriceSnapshot);
   const totalPrice = Number(item.totalPrice);
 
   return (
-    <div className="flex gap-4 py-5">
-      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-        {image ? (
-          <img
-            src={image}
-            alt={item.variant.product.name}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <Package className="h-7 w-7 text-gray-400" />
-          </div>
-        )}
-      </div>
+    <div className="py-5">
+      <div className="flex gap-4">
+        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+          {image ? (
+            <img
+              src={image}
+              alt={item.variant.product.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <Package className="h-7 w-7 text-gray-400" />
+            </div>
+          )}
+        </div>
 
-      <div className="min-w-0 flex-1">
-        <h3 className="truncate font-medium text-gray-900">
-          {item.variant.product.name}
-        </h3>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-medium text-gray-900">
+            {item.variant.product.name}
+          </h3>
 
-        <p className="mt-1 text-xs text-gray-500">SKU: {item.variant.sku}</p>
+          <p className="mt-1 text-xs text-gray-500">
+            SKU: {item.variant.sku}
+          </p>
 
-        <p className="mt-2 text-sm text-gray-500">
-          {item.quantity} × ₦{unitPrice.toLocaleString()}
+          <p className="mt-2 text-sm text-gray-500">
+            {item.quantity} × ₦{unitPrice.toLocaleString()}
+          </p>
+        </div>
+
+        <p className="shrink-0 font-semibold text-gray-900">
+          ₦{totalPrice.toLocaleString()}
         </p>
       </div>
 
-      <p className="shrink-0 font-semibold text-gray-900">
-        ₦{totalPrice.toLocaleString()}
-      </p>
+      {canReview && (
+        <div className="mt-4 ml-24">
+          {reviewsLoading ? (
+            <div className="h-9 w-32 animate-pulse rounded-lg bg-gray-100" />
+          ) : hasReviewed ? (
+            <span className="inline-flex items-center rounded-lg bg-green-50 px-4 py-2 text-sm font-medium text-green-700">
+              Reviewed
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={onStartReview}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-gray-900 hover:text-gray-900"
+            >
+              Write a review
+            </button>
+          )}
+        </div>
+      )}
+
+      {isReviewing && (
+        <div className="mt-5 ml-24">
+          <ReviewForm
+            variantId={item.variant.id}
+            orderId={orderId}
+            onSuccess={onReviewSuccess}
+            onCancel={onCancelReview}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -162,18 +273,20 @@ function OrderItemRow({ item }: { item: Order["items"][number] }) {
 function OrderSummary({ order }: { order: Order }) {
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-gray-900">Order summary</h2>
+      <h2 className="text-lg font-semibold text-gray-900">
+        Order summary
+      </h2>
 
       <div className="mt-5 space-y-3 text-sm">
         <SummaryRow label="Subtotal" value={order.subtotal} />
-
         <SummaryRow label="Shipping" value={order.shippingCost} />
-
         <SummaryRow label="Tax" value={order.taxAmount} />
 
         <div className="border-t border-gray-100 pt-4">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-gray-900">Total</span>
+            <span className="font-semibold text-gray-900">
+              Total
+            </span>
 
             <span className="text-xl font-bold text-gray-900">
               ₦{Number(order.totalAmount).toLocaleString()}
@@ -214,42 +327,89 @@ function OrderStatus({ status }: { status: string }) {
 function OrderPageSkeleton() {
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl animate-pulse px-4 py-8 sm:px-6 lg:px-8">
-        <div className="h-4 w-32 rounded bg-gray-200" />
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="h-5 w-36 animate-pulse rounded bg-gray-200" />
 
-        <div className="mt-6 h-32 rounded-2xl bg-gray-200" />
+        <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6">
+          <div className="h-12 w-full animate-pulse rounded bg-gray-100" />
+        </div>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-6">
-            <div className="h-80 rounded-2xl bg-gray-200" />
-            <div className="h-48 rounded-2xl bg-gray-200" />
+            <div className="rounded-2xl border border-gray-200 bg-white p-6">
+              <div className="h-6 w-24 animate-pulse rounded bg-gray-100" />
+
+              <div className="mt-5 space-y-5">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex gap-4"
+                  >
+                    <div className="h-20 w-20 animate-pulse rounded-xl bg-gray-100" />
+
+                    <div className="flex-1 space-y-3">
+                      <div className="h-4 w-1/2 animate-pulse rounded bg-gray-100" />
+                      <div className="h-3 w-1/3 animate-pulse rounded bg-gray-100" />
+                      <div className="h-3 w-1/4 animate-pulse rounded bg-gray-100" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-white p-6">
+              <div className="h-6 w-40 animate-pulse rounded bg-gray-100" />
+
+              <div className="mt-4 space-y-3">
+                <div className="h-4 w-48 animate-pulse rounded bg-gray-100" />
+                <div className="h-4 w-64 animate-pulse rounded bg-gray-100" />
+                <div className="h-4 w-40 animate-pulse rounded bg-gray-100" />
+              </div>
+            </div>
           </div>
 
-          <div className="h-72 rounded-2xl bg-gray-200" />
+          <div className="rounded-2xl border border-gray-200 bg-white p-6">
+            <div className="h-6 w-32 animate-pulse rounded bg-gray-100" />
+
+            <div className="mt-5 space-y-4">
+              <div className="h-4 w-full animate-pulse rounded bg-gray-100" />
+              <div className="h-4 w-full animate-pulse rounded bg-gray-100" />
+              <div className="h-4 w-full animate-pulse rounded bg-gray-100" />
+              <div className="mt-4 h-8 w-full animate-pulse rounded bg-gray-100" />
+            </div>
+          </div>
         </div>
       </div>
     </main>
   );
 }
 
-function OrderMessage({ title, message }: { title: string; message: string }) {
+function OrderMessage({
+  title,
+  message,
+}: {
+  title: string;
+  message: string;
+}) {
   return (
-    <main className="flex min-h-[70vh] items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
-          <Package className="h-7 w-7 text-gray-500" />
+    <main className="min-h-screen bg-gray-50">
+      <div className="mx-auto flex min-h-[60vh] max-w-2xl items-center justify-center px-4">
+        <div className="w-full rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <h1 className="text-xl font-semibold text-gray-900">
+            {title}
+          </h1>
+
+          <p className="mt-2 text-sm text-gray-500">
+            {message}
+          </p>
+
+          <Link
+            to="/orders"
+            className="mt-6 inline-flex rounded-xl bg-gray-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-800"
+          >
+            View my orders
+          </Link>
         </div>
-
-        <h1 className="mt-5 text-xl font-bold text-gray-900">{title}</h1>
-
-        <p className="mt-2 text-sm text-gray-500">{message}</p>
-
-        <Link
-          to="/products"
-          className="mt-6 inline-flex rounded-lg bg-gray-900 px-5 py-3 text-sm font-semibold text-white"
-        >
-          Continue shopping
-        </Link>
       </div>
     </main>
   );

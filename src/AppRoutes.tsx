@@ -26,6 +26,7 @@ import { ProductPage } from "./pages/products/ProductPage";
 import { BrandsPage } from "./pages/brands/BrandsPage";
 import { BrandPage } from "./pages/brands/BrandPage";
 
+
 import { CategoriesPage } from "./pages/categories/CategoriesPage";
 import { CategoryPage } from "./pages/categories/CategoryPage";
 
@@ -57,6 +58,7 @@ import { AdminEditCategoryPage } from "./pages/admin/AdminEditCategoryPage";
 import { AdminBrandsPage } from "./pages/admin/AdminBrandsPage";
 import { AdminCreateBrandPage } from "./pages/admin/AdminCreateBrandPage";
 import { AdminEditBrandPage } from "./pages/admin/AdminEditBrandPage";
+import AdminReviewsPage from "./pages/admin/AdminReviewsPage";
 
 import AdminFulfillmentsPage from "./pages/admin/AdminFulfillmentsPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
@@ -107,10 +109,7 @@ export function AppRoutes() {
 
         <Route path="/addresses" element={<AddressesPage />} />
 
-        <Route
-          path="/payment/callback"
-          element={<PaymentCallbackPage />}
-        />
+        <Route path="/payment/callback" element={<PaymentCallbackPage />} />
       </Route>
 
       {/* ============================================================
@@ -129,15 +128,11 @@ export function AppRoutes() {
       <Route path="/brands/:slug" element={<BrandPage />} />
       <Route path="/shipping" element={<ShippingPage />} />
 
-
       {/* ============================================================
           ADMIN AUTH
       ============================================================ */}
 
-      <Route
-        path="/admin/login"
-        element={<AdminLoginPage />}
-      />
+      <Route path="/admin/login" element={<AdminLoginPage />} />
 
       {/* ============================================================
           PROTECTED ADMIN
@@ -158,50 +153,26 @@ export function AppRoutes() {
               CATALOG
           -------------------------------------------------------- */}
 
-          <Route
-            path="products"
-            element={<AdminProductsPage />}
-          />
+          <Route path="products" element={<AdminProductsPage />} />
 
-          <Route
-            path="products/new"
-            element={<AdminCreateProductPage />}
-          />
+          <Route path="products/new" element={<AdminCreateProductPage />} />
 
-          <Route
-            path="products/:id/edit"
-            element={<AdminEditProductPage />}
-          />
+          <Route path="products/:id/edit" element={<AdminEditProductPage />} />
 
-          <Route
-            path="categories"
-            element={<AdminCategoriesPage />}
-          />
+          <Route path="categories" element={<AdminCategoriesPage />} />
 
-          <Route
-            path="categories/new"
-            element={<AdminCreateCategoryPage />}
-          />
+          <Route path="categories/new" element={<AdminCreateCategoryPage />} />
 
           <Route
             path="categories/:id/edit"
             element={<AdminEditCategoryPage />}
           />
 
-          <Route
-            path="brands"
-            element={<AdminBrandsPage />}
-          />
+          <Route path="brands" element={<AdminBrandsPage />} />
 
-          <Route
-            path="brands/new"
-            element={<AdminCreateBrandPage />}
-          />
+          <Route path="brands/new" element={<AdminCreateBrandPage />} />
 
-          <Route
-            path="brands/:id/edit"
-            element={<AdminEditBrandPage />}
-          />
+          <Route path="brands/:id/edit" element={<AdminEditBrandPage />} />
 
           <Route
             path="collections"
@@ -213,43 +184,30 @@ export function AppRoutes() {
             element={<AdminComingSoonPage title="Inventory" />}
           />
 
+          <Route path="reviews" element={<AdminReviewsPage />} />
+
           {/* --------------------------------------------------------
               SALES
           -------------------------------------------------------- */}
 
-          <Route
-            path="orders"
-            element={<AdminOrdersPage />}
-          />
+          <Route path="orders" element={<AdminOrdersPage />} />
 
           <Route
             path="customers"
             element={<AdminComingSoonPage title="Customers" />}
           />
 
-          <Route
-            path="fulfillments"
-            element={<AdminFulfillmentsPage />}
-          />
+          <Route path="fulfillments" element={<AdminFulfillmentsPage />} />
 
           {/* --------------------------------------------------------
               SYSTEM
           -------------------------------------------------------- */}
 
-          <Route
-            path="settings"
-            element={<AdminSettingsPage />}
-          />
+          <Route path="settings" element={<AdminSettingsPage />} />
 
-          <Route
-            path="shipping"
-            element={<AdminShippingPage />}
-          />
+          <Route path="shipping" element={<AdminShippingPage />} />
 
-          <Route
-            path="warehouses"
-            element={<AdminWarehousesPage />}
-          />
+          <Route path="warehouses" element={<AdminWarehousesPage />} />
         </Route>
       </Route>
     </Routes>

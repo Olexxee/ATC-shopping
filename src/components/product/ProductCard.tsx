@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import type { StorefrontCard } from "../../api/product/product.contract";
+import { ReviewStars } from "../review/ReviewStars";
 import {
   useAddToWishlist,
   useRemoveFromWishlist,
@@ -145,7 +146,18 @@ export function ProductCard({
           {product.name}
         </Link>
 
+        {product.totalReviews > 0 && (
+          <div className="mt-2 flex items-center gap-2">
+            <ReviewStars rating={product.avgRating} size="sm" />
+
+            <span className="text-xs text-neutral-500">
+              ({product.totalReviews.toLocaleString()})
+            </span>
+          </div>
+        )}
+
         <div className="mt-2 flex items-center gap-2">
+          
           <span className="text-sm font-semibold text-neutral-950">
             ₦{price.toLocaleString()}
           </span>

@@ -3,6 +3,7 @@ import {
   Boxes,
   FolderTree,
   Layers3,
+  MessageSquareText,
   Package,
   Settings,
   ShoppingCart,
@@ -53,6 +54,11 @@ const navigation = [
         label: "Collections",
         to: "/admin/collections",
         icon: Layers3,
+      },
+      {
+        label: "Reviews",
+        to: "/admin/reviews",
+        icon: MessageSquareText,
       },
       {
         label: "Inventory",
@@ -126,9 +132,7 @@ export function AdminSidebar({
       <div
         className={[
           "fixed inset-0 z-50 lg:hidden",
-          mobileOpen
-            ? "pointer-events-auto"
-            : "pointer-events-none",
+          mobileOpen ? "pointer-events-auto" : "pointer-events-none",
         ].join(" ")}
       >
         {/* Backdrop */}
@@ -147,9 +151,7 @@ export function AdminSidebar({
           className={[
             "absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-white shadow-xl",
             "transition-transform duration-300 ease-in-out",
-            mobileOpen
-              ? "translate-x-0"
-              : "-translate-x-full",
+            mobileOpen ? "translate-x-0" : "-translate-x-full",
           ].join(" ")}
         >
           {/* Mobile drawer header */}
@@ -159,9 +161,7 @@ export function AdminSidebar({
                 Keplex
               </span>
 
-              <span className="ml-2 text-sm text-slate-400">
-                Admin
-              </span>
+              <span className="ml-2 text-sm text-slate-400">Admin</span>
             </div>
 
             <button
@@ -188,9 +188,7 @@ interface SidebarNavigationProps {
   onNavigate?: () => void;
 }
 
-function SidebarNavigation({
-  onNavigate,
-}: SidebarNavigationProps) {
+function SidebarNavigation({ onNavigate }: SidebarNavigationProps) {
   return (
     <nav className="space-y-6">
       {navigation.map((group) => (

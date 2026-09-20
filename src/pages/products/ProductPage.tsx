@@ -5,6 +5,8 @@ import { ProductGrid } from "../../components/product/ProductGrid";
 import { ProductGridSkeleton } from "../../components/product/ProductGridSkeleton";
 import { useAddCartItem } from "../../features/cart/cart.mutations";
 import { useCurrentUser } from "../../features/auth/auth.queries";
+import { ReviewStars } from "../../components/review/ReviewStars";
+import { ReviewSection } from "../../components/review/ReviewSection";
 import {
   useProductBySlug,
   useRelatedProducts,
@@ -244,7 +246,10 @@ function ProductDetail({
         <nav aria-label="Breadcrumb" className="mb-8">
           <ol className="flex items-center gap-2 overflow-hidden text-sm text-neutral-500">
             <li className="shrink-0">
-              <Link to="/products" className="transition hover:text-neutral-950">
+              <Link
+                to="/products"
+                className="transition hover:text-neutral-950"
+              >
                 Products
               </Link>
             </li>
@@ -380,16 +385,16 @@ function ProductDetail({
 
             {product.totalReviews > 0 && (
               <div className="mt-4 flex items-center gap-2 text-sm">
-                <span className="tracking-[0.1em] text-neutral-950">
-                  {"★".repeat(Math.round(product.avgRating))}
-                  {"☆".repeat(Math.max(0, 5 - Math.round(product.avgRating)))}
-                </span>
+                <ReviewStars rating={product.avgRating} size="sm" />
+
                 <span className="font-medium text-neutral-900">
                   {product.avgRating.toFixed(1)}
                 </span>
+
                 <span className="text-neutral-300">|</span>
+
                 <span className="text-neutral-500">
-                  {product.totalReviews}{" "}
+                  {product.totalReviews.toLocaleString()}{" "}
                   {product.totalReviews === 1 ? "review" : "reviews"}
                 </span>
               </div>
@@ -544,9 +549,7 @@ function ProductDetail({
                 <div className="flex h-12 shrink-0 items-center rounded-full border border-neutral-200">
                   <button
                     type="button"
-                    onClick={() =>
-                      setQuantity((c) => Math.max(1, c - 1))
-                    }
+                    onClick={() => setQuantity((c) => Math.max(1, c - 1))}
                     disabled={quantity <= 1 || addCartItemMutation.isPending}
                     aria-label="Decrease quantity"
                     className="flex h-full w-11 items-center justify-center text-neutral-700 transition hover:text-neutral-950 disabled:cursor-not-allowed disabled:opacity-30"
@@ -565,7 +568,9 @@ function ProductDetail({
                         Math.min(selectedVariant?.stock ?? c, c + 1),
                       )
                     }
-                    disabled={!canIncreaseQuantity || addCartItemMutation.isPending}
+                    disabled={
+                      !canIncreaseQuantity || addCartItemMutation.isPending
+                    }
                     aria-label="Increase quantity"
                     className="flex h-full w-11 items-center justify-center text-neutral-700 transition hover:text-neutral-950 disabled:cursor-not-allowed disabled:opacity-30"
                   >
@@ -608,7 +613,10 @@ function ProductDetail({
             {selectedVariant && (
               <div className="mt-8 space-y-3 border-t border-neutral-200 pt-7">
                 <div className="flex gap-3">
-                  <Truck size={18} className="mt-0.5 shrink-0 text-neutral-700" />
+                  <Truck
+                    size={18}
+                    className="mt-0.5 shrink-0 text-neutral-700"
+                  />
                   <div>
                     <p className="text-sm font-medium text-neutral-950">
                       Delivery & fulfillment
@@ -632,7 +640,7 @@ function ProductDetail({
           </div>
         </section>
 
-        {/* Details */}
+                {/* Details */}
         <section className="mt-20 border-t border-neutral-200 pt-12">
           <div className="grid gap-10 md:grid-cols-3">
             <div>
@@ -659,22 +667,33 @@ function ProductDetail({
                 {product.brand && (
                   <DetailItem label="Brand" value={product.brand.name} />
                 )}
+
                 {product.category && (
                   <DetailItem label="Category" value={product.category.name} />
                 )}
+
                 {product.collection && (
                   <DetailItem
                     label="Collection"
                     value={product.collection.name}
                   />
                 )}
+
                 {selectedVariant?.sku && (
-                  <DetailItem label="SKU" value={selectedVariant.sku} />
+                  <DetailItem
+                    label="SKU"
+                    value={selectedVariant.sku}
+                  />
                 )}
               </div>
             </div>
           </div>
         </section>
+
+        {/* Reviews */}
+        {selectedVariant && (
+          <ReviewSection variantId={selectedVariant.id} />
+        )}
 
         {/* Related */}
         {relatedLoading ? (
