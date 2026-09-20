@@ -29,6 +29,7 @@ import { BrandPage } from "./pages/brands/BrandPage";
 import { CategoriesPage } from "./pages/categories/CategoriesPage";
 import { CategoryPage } from "./pages/categories/CategoryPage";
 
+import { ShippingPage } from "./pages/shipping/ShippingPage";
 import CartPage from "./pages/Cart/CartPage";
 import WishlistPage from "./pages/wishlist/WishlistPage";
 import CheckoutPage from "./pages/checkout/CheckoutPage";
@@ -126,6 +127,8 @@ export function AppRoutes() {
 
       <Route path="/brands" element={<BrandsPage />} />
       <Route path="/brands/:slug" element={<BrandPage />} />
+      <Route path="/shipping" element={<ShippingPage />} />
+
 
       {/* ============================================================
           ADMIN AUTH
