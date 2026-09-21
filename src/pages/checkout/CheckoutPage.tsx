@@ -9,7 +9,7 @@ import CheckoutAddress from "../../components/checkout/CheckoutAddress";
 import CheckoutNotes from "../../components/checkout/CheckoutNotes";
 import CheckoutOrderSummary from "../../components/checkout/CheckoutOrderSummary";
 
-
+type PaymentProvider = "PAYSTACK" | "PAWAPAY";
 
 export default function CheckoutPage() {
   const {
@@ -32,6 +32,12 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [notes, setNotes] = useState("");
 
+  const [paymentProvider, setPaymentProvider] =
+    useState<PaymentProvider>("PAYSTACK");
+
+  const [paymentError, setPaymentError] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+
   useEffect(() => {
     if (serverCart) {
       setCart(serverCart);
@@ -52,7 +58,17 @@ export default function CheckoutPage() {
   );
 
   const handlePlaceOrder = () => {
+    setPaymentError("");
+
+    if (paymentProvider === "PAWAPAY" && !phoneNumber.trim()) {
+      setPaymentError("Enter your mobile money phone number to continue.");
+      return;
+    }
     if (!selectedAddressId || checkoutMutation.isPending) {
+      return;
+    }
+
+    if (paymentProvider === "PAWAPAY" && !phoneNumber.trim()) {
       return;
     }
 
@@ -60,19 +76,31 @@ export default function CheckoutPage() {
       {
         addressId: selectedAddressId,
         notes: notes.trim() || undefined,
+        paymentProvider,
+        phoneNumber:
+          paymentProvider === "PAWAPAY" ? phoneNumber.trim() : undefined,
       },
       {
         onSuccess: (response) => {
-          const authorizationUrl =
-            response.data.payment?.authorizationUrl;
+          const payment = response.data.payment;
 
-          if (!authorizationUrl) {
-            throw new Error(
-              "Payment authorization URL was not returned.",
-            );
+          if (payment.provider === "PAYSTACK") {
+            if (!payment.authorizationUrl) {
+              throw new Error("Payment authorization URL was not returned.");
+            }
+
+            window.location.assign(payment.authorizationUrl);
+            return;
           }
 
-          window.location.assign(authorizationUrl);
+          if (payment.provider === "PAWAPAY") {
+            const params = new URLSearchParams();
+
+            params.set("reference", payment.reference);
+            params.set("orderId", response.data.id);
+
+            window.location.assign(`/payment/pending?${params.toString()}`);
+          }
         },
       },
     );
@@ -168,6 +196,21 @@ export default function CheckoutPage() {
             />
 
             <CheckoutNotes value={notes} onChange={setNotes} />
+
+            <PaymentMethodCard
+              paymentProvider={paymentProvider}
+              onChange={setPaymentProvider}
+              phoneNumber={phoneNumber}
+              onPhoneNumberChange={setPhoneNumber}
+            />
+            {paymentError && (
+              <div
+                role="alert"
+                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              >
+                {paymentError}
+              </div>
+            )}
           </div>
 
           <aside className="lg:sticky lg:top-6 lg:self-start">
@@ -181,6 +224,129 @@ export default function CheckoutPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+interface PaymentMethodCardProps {
+  paymentProvider: PaymentProvider;
+  onChange: (provider: PaymentProvider) => void;
+  phoneNumber: string;
+  onPhoneNumberChange: (value: string) => void;
+}
+
+function PaymentMethodCard({
+  paymentProvider,
+  onChange,
+  phoneNumber,
+  onPhoneNumberChange,
+}: PaymentMethodCardProps) {
+  return (
+    <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+      <div>
+        <h2 className="text-base font-semibold text-gray-900">
+          Payment method
+        </h2>
+
+        <p className="mt-1 text-sm text-gray-500">
+          Choose how you want to pay for this order.
+        </p>
+      </div>
+
+      <div className="mt-5 space-y-3">
+        <PaymentMethodOption
+          selected={paymentProvider === "PAYSTACK"}
+          onClick={() => onChange("PAYSTACK")}
+          title="Paystack"
+          description="Pay securely with card, bank transfer, or supported payment methods."
+        />
+
+        <PaymentMethodOption
+          selected={paymentProvider === "PAWAPAY"}
+          onClick={() => onChange("PAWAPAY")}
+          title="Mobile Money"
+          description="Pay directly from your supported mobile-money account."
+        />
+      </div>
+
+      {paymentProvider === "PAWAPAY" && (
+        <div className="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <label
+            htmlFor="pawapay-phone"
+            className="block text-sm font-medium text-gray-900"
+          >
+            Mobile money phone number
+          </label>
+
+          <p className="mt-1 text-xs leading-5 text-gray-500">
+            Enter the phone number connected to your mobile-money account.
+          </p>
+
+          <input
+            id="pawapay-phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            value={phoneNumber}
+            onChange={(event) => onPhoneNumberChange(event.target.value)}
+            placeholder="+2348012345678"
+            className="mt-3 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
+          />
+
+          <div className="mt-3 flex gap-2 text-xs leading-5 text-gray-500">
+            <span className="mt-0.5 shrink-0">ⓘ</span>
+
+            <p>
+              You will receive a mobile-money authorization prompt on this
+              number when the payment is initiated.
+            </p>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+interface PaymentMethodOptionProps {
+  selected: boolean;
+  onClick: () => void;
+  title: string;
+  description: string;
+}
+
+function PaymentMethodOption({
+  selected,
+  onClick,
+  title,
+  description,
+}: PaymentMethodOptionProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full rounded-xl border p-4 text-left transition ${
+        selected
+          ? "border-gray-900 bg-gray-50 ring-1 ring-gray-900"
+          : "border-gray-200 bg-white hover:border-gray-400"
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+            selected ? "border-gray-900" : "border-gray-300"
+          }`}
+        >
+          {selected && (
+            <span className="h-2.5 w-2.5 rounded-full bg-gray-900" />
+          )}
+        </span>
+
+        <div>
+          <p className="text-sm font-semibold text-gray-900">{title}</p>
+
+          <p className="mt-1 text-xs leading-5 text-gray-500">{description}</p>
+        </div>
+      </div>
+    </button>
   );
 }
 
@@ -223,9 +389,7 @@ function CheckoutMessage({
           <ShoppingBag className="h-7 w-7 text-gray-500" />
         </div>
 
-        <h1 className="mt-5 text-xl font-bold text-gray-900">
-          {title}
-        </h1>
+        <h1 className="mt-5 text-xl font-bold text-gray-900">{title}</h1>
 
         <p className="mt-2 text-sm text-gray-500">{message}</p>
 
@@ -235,3 +399,40 @@ function CheckoutMessage({
   );
 }
 
+// ```
+
+// There is **one frontend dependency we now need to inspect before changing the checkout mutation**:
+
+// ```text
+// useCheckout()
+// ```
+
+// Your current `CheckoutPage` is sending only:
+
+// ```ts
+// {
+//   addressId,
+//   notes
+// }
+// ```
+
+// but the new UI sends:
+
+// ```ts
+// {
+//   addressId,
+//   notes,
+//   paymentProvider,
+//   phoneNumber
+// }
+// ```
+
+// So **don't change `CheckoutOrderSummary` yet**. It doesn't need to know anything about the payment provider.
+
+// Paste your:
+
+// ```text
+// features/checkout/checkout.mutations.ts
+// ```
+
+// and, if it exists separately, the checkout API/types file it uses. That's the next file we need to update so this UI actually reaches the backend correctly.

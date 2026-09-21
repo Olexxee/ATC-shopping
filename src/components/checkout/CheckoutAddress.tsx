@@ -2,7 +2,6 @@ import { Check, MapPin, Plus, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Address } from "../../features/address/address.types";
 
-
 interface CheckoutAddressProps {
   addresses: Address[];
   selectedAddressId: string;

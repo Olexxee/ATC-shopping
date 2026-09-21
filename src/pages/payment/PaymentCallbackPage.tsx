@@ -3,7 +3,6 @@ import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../../lib/api";
 
-
 interface PaymentVerificationResponse {
   success: boolean;
   message: string;
@@ -13,6 +12,7 @@ interface PaymentVerificationResponse {
       reference: string;
       status: string;
       orderId?: string | null;
+      provider?: string;
     };
     order?: {
       id: string;
@@ -32,7 +32,7 @@ export default function PaymentCallbackPage() {
     useState<VerificationState>("verifying");
 
   const [message, setMessage] = useState(
-    "Confirming your payment with Paystack...",
+    "Confirming your payment...",
   );
 
   useEffect(() => {
@@ -197,3 +197,11 @@ export default function PaymentCallbackPage() {
     </main>
   );
 }
+
+// The important change is simply that this page no longer says **“with Paystack”**. It can now serve as the generic payment verification destination.
+
+// However, **this is not where we add the pawaPay UI**.
+
+// The pawaPay-specific UI belongs on your **checkout/payment selection screen**, where the customer chooses how to pay and enters their mobile-money phone number.
+
+// Paste that checkout/payment component next. That's the file we should modify.

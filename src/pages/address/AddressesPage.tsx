@@ -16,8 +16,6 @@ import type {
   UpdateAddressPayload,
 } from "../../features/address/address.types";
 
-
-
 const MAX_ADDRESSES = 3;
 
 export default function AddressesPage() {

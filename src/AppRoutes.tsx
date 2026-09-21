@@ -34,6 +34,7 @@ import { ShippingPage } from "./pages/shipping/ShippingPage";
 import CartPage from "./pages/Cart/CartPage";
 import WishlistPage from "./pages/wishlist/WishlistPage";
 import CheckoutPage from "./pages/checkout/CheckoutPage";
+import PaymentPendingPage from "./pages/payment/PaymentPendingPage";
 
 import OrdersPage from "./pages/orders/OrdersPage";
 import OrderPage from "./pages/orders/OrderPage";
@@ -97,19 +98,14 @@ export function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/account" element={<AccountPage />} />
-
         <Route path="/orders" element={<OrdersPage />} />
         <Route path="/orders/:id" element={<OrderPage />} />
-
         <Route path="/cart" element={<CartPage />} />
-
         <Route path="/wishlist" element={<WishlistPage />} />
-
         <Route path="/checkout" element={<CheckoutPage />} />
-
         <Route path="/addresses" element={<AddressesPage />} />
-
         <Route path="/payment/callback" element={<PaymentCallbackPage />} />
+        <Route path="/payment/pending" element={<PaymentPendingPage />} />
       </Route>
 
       {/* ============================================================
@@ -117,21 +113,17 @@ export function AppRoutes() {
       ============================================================ */}
 
       <Route path="/" element={<HomePage />} />
-
       <Route path="/products" element={<ProductsPage />} />
       <Route path="/products/:slug" element={<ProductPage />} />
-
       <Route path="/categories" element={<CategoriesPage />} />
       <Route path="/categories/:slug" element={<CategoryPage />} />
-
       <Route path="/brands" element={<BrandsPage />} />
       <Route path="/brands/:slug" element={<BrandPage />} />
       <Route path="/shipping" element={<ShippingPage />} />
-
+      
       {/* ============================================================
           ADMIN AUTH
       ============================================================ */}
-
       <Route path="/admin/login" element={<AdminLoginPage />} />
 
       {/* ============================================================

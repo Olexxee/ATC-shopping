@@ -1,13 +1,22 @@
+export type CheckoutPaymentProvider =
+  | "PAYSTACK"
+  | "PAWAPAY";
+
 export interface CheckoutPayload {
   addressId: string;
   notes?: string;
+  paymentProvider?: CheckoutPaymentProvider;
+  phoneNumber?: string;
 }
 
 export interface CheckoutPayment {
   paymentId: string;
   reference: string;
-  authorizationUrl: string;
+  provider: CheckoutPaymentProvider;
+  status: string;
+  authorizationUrl?: string | null;
   accessCode?: string | null;
+  providerReference?: string | null;
 }
 
 export interface CheckoutShippingQuote {
