@@ -1,3 +1,4 @@
+// features/admin/products/components/ProductEditor.tsx
 import { useEffect, useState } from "react";
 import type { AdminProductDetail } from "../../../../api/product/product.contract";
 import { useUpdateProductScalars } from "../hooks/useUpdateProductScalars";
@@ -76,7 +77,9 @@ export function ProductEditor({ product, onSaved }: Props) {
 
       <ProductScalars values={draft} onChange={updateDraft} />
 
-      <VariantList productId={draft.id} variants={draft.variants} />
+      {/* Read variants from `product`, not `draft`. Refetches after any
+          variant mutation land here without waiting for the draft reset. */}
+      <VariantList productId={product.id} variants={product.variants} />
 
       <div className="sticky bottom-0 z-20 -mx-4 border-t border-slate-200 bg-white/95 px-4 py-4 backdrop-blur md:-mx-6 md:px-6">
         <div className="mx-auto flex max-w-6xl items-center justify-end gap-3">

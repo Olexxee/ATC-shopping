@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   updateVariant,
-  type VariantPayload,
+  type VariantUpdatePayload,
 } from "../../../../api/product/variants.api";
 import { adminProductKeys } from "./useAdminProduct";
 
@@ -12,12 +12,13 @@ export function useUpdateVariant(productId: string) {
     mutationFn: ({
       variantId,
       payload,
-      media,
+      media = [],
     }: {
       variantId: string;
-      payload: Partial<VariantPayload>;
+      payload: VariantUpdatePayload;
       media?: File[];
-    }) => updateVariant(variantId, payload, media ?? []),
+    }) => updateVariant(variantId, payload, media),
+
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: adminProductKeys.detail(productId) });
     },

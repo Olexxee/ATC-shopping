@@ -1,3 +1,4 @@
+// products.api.ts (trimmed — createProduct/CreateProductPayload removed)
 import { api } from "../../lib/api";
 import type {
   StorefrontCard,
@@ -124,28 +125,9 @@ export const getAdminProduct = async (id: string) => {
 };
 
 // ── Admin writes ─────────────────────────────────────────────────────
-
-export interface CreateProductPayload {
-  name: string;
-  slug: string;
-  description?: string | null;
-  brandId?: string | null;
-  categoryId: string;
-  collectionId?: string | null;
-  isFeatured?: boolean;
-  isNew?: boolean;
-  isBestSeller?: boolean;
-  status?: "DRAFT" | "ACTIVE" | "ARCHIVED";
-  metadata?: Record<string, unknown> | null;
-}
-
-export const createProduct = async (payload: CreateProductPayload) => {
-  const res = await api.post<Envelope<AdminProductDetail>>(
-    "/api/products",
-    payload,
-  );
-  return res.data.data;
-};
+// NOTE: createProduct now lives in ./product.api.ts (multipart, carries
+// variants) — that's the endpoint the backend actually validates against.
+// Do not re-add a JSON-only createProduct here.
 
 export interface UpdateProductPayload {
   name?: string;

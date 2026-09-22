@@ -1,8 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  updateProduct,
-} from "../../products/api/product.api";
-import type {UpdateProductPayload} from "../../../../api/product/products.api"
+import { updateProduct } from "../../products/api/product.api";
+import type { UpdateProductPayload } from "../../../../api/product/products.api";
+import type { AdminProductDetail } from "../../../../api/product/product.contract";
 import { adminProductKeys } from "./useAdminProduct";
 
 export function useUpdateProductScalars() {
@@ -15,16 +14,27 @@ export function useUpdateProductScalars() {
     }: {
       id: string;
       payload: UpdateProductPayload;
-    }) => {
-      const requestBody = {
-        product: payload,
-        images: [],
-      } as unknown as Parameters<typeof updateProduct>[1];
+    }) => updateProduct(id, { product: payload, images: [] }),
 
-      return updateProduct(id, requestBody);
-    },
     onSuccess: (product) => {
-      qc.setQueryData(adminProductKeys.detail(product.id), product);
+      qc.setQueryData<AdminProductDetail>(
+        adminProductKeys.detail(product.id),
+        (prev) => {
+          // First load — nothing cached yet, take the response as-is.
+          if (!prev) return product as AdminProductDetail;
+
+          // Merge: server wins for scalars; keep the cached variants and
+          // metadata when the PATCH response omits them.
+          return {
+            ...prev,
+            ...product,
+            metadata: (product as Partial<AdminProductDetail>).metadata ?? prev.metadata,
+            variants:
+              (product as Partial<AdminProductDetail>).variants ?? prev.variants,
+          } as AdminProductDetail;
+        },
+      );
+
       qc.invalidateQueries({ queryKey: adminProductKeys.lists() });
     },
   });

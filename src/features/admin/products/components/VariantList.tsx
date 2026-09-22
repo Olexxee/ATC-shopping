@@ -1,7 +1,10 @@
+// features/admin/products/components/VariantList.tsx
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import type { AdminVariant } from "../../../../api/product/product.contract";
-import { useArchiveVariant } from "../hooks/useArchiveVariant";
+import type { VariantPayload } from "../../../../api/product/variants.api";
 import { useCreateVariant } from "../hooks/useCreateVariant";
+import { useArchiveVariant } from "../hooks/useArchiveVariant";
 import { VariantRow } from "./VariantRow";
 
 interface Props {
@@ -10,79 +13,70 @@ interface Props {
 }
 
 export function VariantList({ productId, variants }: Props) {
-  const [adding, setAdding] = useState(false);
-  const archiveMutation = useArchiveVariant(productId);
-  const createMutation = useCreateVariant(productId);
+  const [isAdding, setIsAdding] = useState(false);
 
-  const activeVariants = variants.filter((v) => v.isActive);
-  const archivedVariants = variants.filter((v) => !v.isActive);
+  const createMutation = useCreateVariant(productId);
+  const archiveMutation = useArchiveVariant(productId);
+
+  const handleCreate = async (payload: VariantPayload, media: File[]) => {
+    await createMutation.mutateAsync({ payload, media });
+    setIsAdding(false);
+  };
+
+  const handleArchive = async (variantId: string) => {
+    if (!window.confirm("Archive this variant? It can be restored later.")) {
+      return;
+    }
+    await archiveMutation.mutateAsync(variantId);
+  };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-base font-semibold text-slate-900">Variants</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Each variant saves independently.
-          </p>
-        </div>
-        
-        <button
-          type="button"
-          onClick={() => setAdding(true)}
-          className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold"
-        >
-          Add variant
-        </button>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-slate-900">
+          Variants
+          <span className="ml-2 text-xs font-normal text-slate-500">
+            {variants.length}
+          </span>
+        </h2>
+
+        {!isAdding && (
+          <button
+            type="button"
+            onClick={() => setIsAdding(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          >
+            <Plus size={14} />
+            Add variant
+          </button>
+        )}
       </div>
 
-      <div className="space-y-4">
-        {activeVariants.map((variant) => (
+      {variants.length === 0 && !isAdding && (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/50 px-4 py-8 text-center">
+          <p className="text-sm text-slate-500">No variants yet.</p>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {variants.map((variant) => (
           <VariantRow
             key={variant.id}
             productId={productId}
             variant={variant}
-            onArchive={() => {
-              if (confirm(`Archive variant ${variant.sku}?`)) {
-                archiveMutation.mutate(variant.id);
-              }
-            }}
+            onArchive={() => handleArchive(variant.id)}
           />
         ))}
 
-        {adding && (
+        {isAdding && (
           <VariantRow
             productId={productId}
             variant={null}
-            onCancel={() => setAdding(false)}
-            onSave={async (payload, media) => {
-              await createMutation.mutateAsync({ payload, media });
-              setAdding(false);
-            }}
+            onCancel={() => setIsAdding(false)}
+            onSave={handleCreate}
           />
         )}
       </div>
-
-      {archivedVariants.length > 0 && (
-        <div className="mt-8 border-t border-slate-200 pt-6">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Archived ({archivedVariants.length})
-          </p>
-          <ul className="space-y-2 text-sm text-slate-600">
-            {archivedVariants.map((v) => (
-              <li key={v.id} className="flex items-center justify-between">
-                <span>{v.sku}</span>
-                <button
-                  type="button"
-                  className="text-xs font-medium text-slate-700 underline"
-                >
-                  Restore
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </section>
+    </div>
   );
 }

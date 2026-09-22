@@ -107,6 +107,7 @@ export interface ProductPriceRange {
 }
 
 export interface Product {
+  images: any;
   id: string;
   name: string;
   slug: string;
