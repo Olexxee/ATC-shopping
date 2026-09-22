@@ -75,17 +75,6 @@ const JSON_FIELDS = new Set(["attributes", "metadata"]);
  * means we can format them consistently (no trailing spaces, no scientific
  * notation surprises).
  */
-const NUMERIC_FIELDS = new Set([
-  "price",
-  "compareAtPrice",
-  "stock",
-  "weight",
-  "actualWeight",
-  "length",
-  "width",
-  "height",
-]);
-
 // ============================================================================
 // FORM DATA BUILDER
 // ============================================================================
