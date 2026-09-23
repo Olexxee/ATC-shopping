@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import { useCreateProduct } from "../../features/admin/products/hooks/useCreateProduct";
