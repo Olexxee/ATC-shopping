@@ -10,7 +10,7 @@ import {
 import type {
   ProductFulfillmentType,
   ProductShippingType,
-} from "../../features/admin/products/api/product.api";
+} from "../../features/admin/products/api/adminProducts.api";
 
 interface VariantFormState {
   sku: string;

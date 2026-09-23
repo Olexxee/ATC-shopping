@@ -1,22 +1,24 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateProductStatus, type ProductStatus } from "../api/product.api";
+import {
+  updateAdminProductStatus,
+  type ProductStatus,
+} from "../api/adminProducts.api";
 import { adminProductKeys } from "./useAdminProduct";
 
-interface Vars {
-  productId: string;
-  status: ProductStatus;
-}
-
 export function useUpdateProductStatus() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ productId, status }: Vars) =>
-      updateProductStatus(productId, status),
-
+    mutationFn: ({
+      productId,
+      status,
+    }: {
+      productId: string;
+      status: ProductStatus;
+    }) => updateAdminProductStatus(productId, status),
     onSuccess: (product, { productId }) => {
-      queryClient.setQueryData(adminProductKeys.detail(productId), product);
-      queryClient.invalidateQueries({ queryKey: adminProductKeys.lists() });
+      qc.setQueryData(adminProductKeys.detail(productId), product);
+      qc.invalidateQueries({ queryKey: adminProductKeys.lists() });
     },
   });
 }

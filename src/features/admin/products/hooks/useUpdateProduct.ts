@@ -1,5 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateProduct, type UpdateProductForm } from "../api/product.api";
+import {
+  updateProduct,
+  type UpdateProductForm,
+} from "../api/adminProducts.api";
 import { adminProductKeys } from "./useAdminProduct";
 
 interface UpdateProductVars {

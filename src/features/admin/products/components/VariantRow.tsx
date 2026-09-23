@@ -1,6 +1,9 @@
 import { useState } from "react";
 import type { AdminVariant } from "../../../../api/product/product.contract";
-import type { VariantPayload } from "../../../../api/product/variants.api";
+import type {
+  CreateVariantInput,
+  UpdateVariantInput,
+} from "../api/adminVariants.api";
 import { useUpdateVariant } from "../hooks/useUpdateVariant";
 
 interface Props {
@@ -8,99 +11,200 @@ interface Props {
   variant: AdminVariant | null;
   onArchive?: () => void;
   onCancel?: () => void;
-  onSave?: (payload: VariantPayload, media: File[]) => Promise<void>;
+  onSave?: (payload: CreateVariantInput, media: File[]) => Promise<void>;
 }
 
-export function VariantRow({ productId, variant, onArchive, onCancel, onSave }: Props) {
+interface Draft {
+  sku: string;
+  color: string;
+  size: string;
+  price: string;
+  compareAtPrice: string;
+  stock: string;
+  weight: string;
+  actualWeight: string;
+  length: string;
+  width: string;
+  height: string;
+  fulfillmentType: string;
+  shippingType: string;
+  isActive: boolean;
+}
+
+const str = (n: number | null | undefined) =>
+  n === null || n === undefined ? "" : String(n);
+
+const toDraft = (variant: AdminVariant | null): Draft =>
+  variant
+    ? {
+        sku: variant.sku ?? "",
+        color: variant.color ?? "",
+        size: variant.size ?? "",
+        price: String(variant.price),
+        compareAtPrice: str(variant.compareAtPrice),
+        stock: String(variant.stock),
+        weight: String(variant.weight),
+        actualWeight: String(variant.actualWeight),
+        length: str(variant.length),
+        width: str(variant.width),
+        height: str(variant.height),
+        fulfillmentType: variant.fulfillmentType,
+        shippingType: variant.shippingType,
+        isActive: variant.isActive,
+      }
+    : {
+        sku: "",
+        color: "",
+        size: "",
+        price: "",
+        compareAtPrice: "",
+        stock: "0",
+        weight: "",
+        actualWeight: "",
+        length: "",
+        width: "",
+        height: "",
+        fulfillmentType: "LOCAL",
+        shippingType: "LOCAL",
+        isActive: true,
+      };
+
+const parseRequiredNumber = (s: string, field: string): number => {
+  const n = Number(s);
+  if (!s.trim() || !Number.isFinite(n)) {
+    throw new Error(`${field} must be a valid number`);
+  }
+  return n;
+};
+
+const parseOptionalNumber = (s: string): number | null => {
+  if (!s.trim()) return null;
+  const n = Number(s);
+  if (!Number.isFinite(n)) throw new Error("Invalid numeric value");
+  return n;
+};
+
+export function VariantRow({
+  productId,
+  variant,
+  onArchive,
+  onCancel,
+  onSave,
+}: Props) {
   const isNew = variant === null;
-
-  const [draft, setDraft] = useState<Partial<VariantPayload>>(
-    variant
-      ? {
-          sku: variant.sku ?? "",
-          color: variant.color ?? "",
-          size: variant.size ?? "",
-          price: variant.price,
-          compareAtPrice: variant.compareAtPrice,
-          stock: variant.stock,
-          weight: variant.weight,
-          actualWeight: variant.actualWeight,
-          length: variant.length,
-          width: variant.width,
-          height: variant.height,
-          fulfillmentType: variant.fulfillmentType,
-          shippingType: variant.shippingType,
-          isActive: variant.isActive,
-        }
-      : { isActive: true, stock: 0, weight: 0, actualWeight: 0 },
-  );
-
+  const [draft, setDraft] = useState<Draft>(() => toDraft(variant));
   const [media, setMedia] = useState<File[]>([]);
   const updateMutation = useUpdateVariant(productId);
+  const [state, setState] = useState<"idle" | "saving" | "saved" | "error">(
+    "idle",
+  );
+  const [error, setError] = useState<string | null>(null);
 
-  const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const set = <K extends keyof Draft>(key: K, value: Draft[K]) => {
+    setDraft((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const buildPayload = (): UpdateVariantInput => ({
+    sku: draft.sku.trim() || undefined,
+    color: draft.color.trim() || undefined,
+    size: draft.size.trim() || undefined,
+    price: parseRequiredNumber(draft.price, "Price"),
+    compareAtPrice: parseOptionalNumber(draft.compareAtPrice),
+    stock: Number.parseInt(draft.stock || "0", 10),
+    weight: parseRequiredNumber(draft.weight, "Weight"),
+    actualWeight: parseRequiredNumber(draft.actualWeight, "Actual weight"),
+    length: parseOptionalNumber(draft.length),
+    width: parseOptionalNumber(draft.width),
+    height: parseOptionalNumber(draft.height),
+    fulfillmentType: draft.fulfillmentType,
+    shippingType: draft.shippingType,
+    isActive: draft.isActive,
+  });
 
   const save = async () => {
     setState("saving");
+    setError(null);
     try {
+      const payload = buildPayload();
       if (isNew) {
-        await onSave?.(draft as VariantPayload, media);
+        await onSave?.(payload as CreateVariantInput, media);
       } else {
         await updateMutation.mutateAsync({
           variantId: variant!.id,
-          payload: draft,
+          payload,
           media,
         });
       }
       setState("saved");
       setMedia([]);
       setTimeout(() => setState("idle"), 1500);
-    } catch {
+    } catch (err) {
       setState("error");
+      setError(err instanceof Error ? err.message : "Save failed");
     }
   };
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-5">
       <div className="grid gap-4 md:grid-cols-4">
-        <Input
-          label="SKU"
-          value={draft.sku ?? ""}
-          onChange={(v) => setDraft({ ...draft, sku: v })}
-        />
+        <Input label="SKU" value={draft.sku} onChange={(v) => set("sku", v)} />
         <Input
           label="Color"
-          value={draft.color ?? ""}
-          onChange={(v) => setDraft({ ...draft, color: v })}
+          value={draft.color}
+          onChange={(v) => set("color", v)}
         />
         <Input
           label="Size"
-          value={draft.size ?? ""}
-          onChange={(v) => setDraft({ ...draft, size: v })}
+          value={draft.size}
+          onChange={(v) => set("size", v)}
         />
         <Input
           label="Price"
           type="number"
-          value={String(draft.price ?? "")}
-          onChange={(v) => setDraft({ ...draft, price: Number(v) })}
+          value={draft.price}
+          onChange={(v) => set("price", v)}
+        />
+        <Input
+          label="Compare at price"
+          type="number"
+          value={draft.compareAtPrice}
+          onChange={(v) => set("compareAtPrice", v)}
         />
         <Input
           label="Stock"
           type="number"
-          value={String(draft.stock ?? 0)}
-          onChange={(v) => setDraft({ ...draft, stock: Number(v) })}
+          value={draft.stock}
+          onChange={(v) => set("stock", v)}
         />
         <Input
           label="Weight"
           type="number"
-          value={String(draft.weight ?? 0)}
-          onChange={(v) => setDraft({ ...draft, weight: Number(v) })}
+          value={draft.weight}
+          onChange={(v) => set("weight", v)}
         />
         <Input
           label="Actual weight"
           type="number"
-          value={String(draft.actualWeight ?? 0)}
-          onChange={(v) => setDraft({ ...draft, actualWeight: Number(v) })}
+          value={draft.actualWeight}
+          onChange={(v) => set("actualWeight", v)}
+        />
+        <Input
+          label="Length"
+          type="number"
+          value={draft.length}
+          onChange={(v) => set("length", v)}
+        />
+        <Input
+          label="Width"
+          type="number"
+          value={draft.width}
+          onChange={(v) => set("width", v)}
+        />
+        <Input
+          label="Height"
+          type="number"
+          value={draft.height}
+          onChange={(v) => set("height", v)}
         />
       </div>
 
@@ -117,7 +221,9 @@ export function VariantRow({ productId, variant, onArchive, onCancel, onSave }: 
       <div className="mt-5 flex items-center justify-between gap-3">
         <div className="text-sm">
           {state === "saved" && <span className="text-emerald-600">Saved</span>}
-          {state === "error" && <span className="text-red-600">Save failed</span>}
+          {state === "error" && (
+            <span className="text-red-600">{error ?? "Save failed"}</span>
+          )}
         </div>
 
         <div className="flex gap-2">
@@ -153,8 +259,12 @@ export function VariantRow({ productId, variant, onArchive, onCancel, onSave }: 
   );
 }
 
-// Small local helper — put in its own file if reused
-function Input({ label, value, onChange, type = "text" }: {
+function Input({
+  label,
+  value,
+  onChange,
+  type = "text",
+}: {
   label: string;
   value: string;
   onChange: (v: string) => void;
@@ -162,7 +272,9 @@ function Input({ label, value, onChange, type = "text" }: {
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-slate-600">{label}</span>
+      <span className="mb-1 block text-xs font-medium text-slate-600">
+        {label}
+      </span>
       <input
         type={type}
         value={value}

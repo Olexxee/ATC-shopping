@@ -1,5 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createVariant, type VariantPayload } from "../../../../api/product/variants.api";
+import {
+  createVariantForProduct,
+  type CreateVariantInput,
+} from "../api/adminVariants.api";
 import { adminProductKeys } from "./useAdminProduct";
 
 export function useCreateVariant(productId: string) {
@@ -10,12 +13,11 @@ export function useCreateVariant(productId: string) {
       payload,
       media = [],
     }: {
-      payload: VariantPayload;
+      payload: CreateVariantInput;
       media?: File[];
-    }) => createVariant(productId, payload, media),
+    }) => createVariantForProduct(productId, payload, media),
 
     onSuccess: () => {
-      // Refetch the product so `product.variants` includes the new row.
       qc.invalidateQueries({ queryKey: adminProductKeys.detail(productId) });
     },
   });

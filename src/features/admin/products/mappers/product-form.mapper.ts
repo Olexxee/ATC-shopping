@@ -3,7 +3,10 @@ import type {
   ProductFormValues,
   ProductFormVariant,
 } from "../types/product-form.types";
-import type { ProductPayload, ProductVariantInput } from "../api/product.api";
+import type {
+  ProductPayload,
+  ProductVariantInput,
+} from "../api/adminProducts.api";
 
 const decimalToString = (value: string | number | null | undefined): string => {
   if (value === null || value === undefined) return "";

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { archiveProduct } from "../../../../api/product/products.api";
+import { archiveAdminProduct } from "../api/adminProducts.api";
 import { adminProductKeys } from "./useAdminProduct";
 
 export function useArchiveProduct() {
@@ -7,7 +7,7 @@ export function useArchiveProduct() {
 
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
-      archiveProduct(id, reason),
+      archiveAdminProduct(id, reason),
     onSuccess: (_result, { id }) => {
       qc.removeQueries({ queryKey: adminProductKeys.detail(id) });
       qc.invalidateQueries({ queryKey: adminProductKeys.lists() });

@@ -1,12 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { archiveVariant, restoreVariant } from "../../../../api/product/variants.api";
+import {
+  archiveAdminVariant,
+  restoreAdminVariant,
+} from "../api/adminVariants.api";
 import { adminProductKeys } from "./useAdminProduct";
 
 export function useArchiveVariant(productId: string) {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (variantId: string) => archiveVariant(variantId),
+    mutationFn: (variantId: string) => archiveAdminVariant(variantId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: adminProductKeys.detail(productId) });
     },
@@ -17,7 +20,7 @@ export function useRestoreVariant(productId: string) {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (variantId: string) => restoreVariant(variantId),
+    mutationFn: (variantId: string) => restoreAdminVariant(variantId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: adminProductKeys.detail(productId) });
     },

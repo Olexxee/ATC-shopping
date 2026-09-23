@@ -1,8 +1,7 @@
-// features/admin/products/components/VariantList.tsx
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import type { AdminVariant } from "../../../../api/product/product.contract";
-import type { VariantPayload } from "../../../../api/product/variants.api";
+import type { CreateVariantInput } from "../api/adminVariants.api";
 import { useCreateVariant } from "../hooks/useCreateVariant";
 import { useArchiveVariant } from "../hooks/useArchiveVariant";
 import { VariantRow } from "./VariantRow";
@@ -18,7 +17,7 @@ export function VariantList({ productId, variants }: Props) {
   const createMutation = useCreateVariant(productId);
   const archiveMutation = useArchiveVariant(productId);
 
-  const handleCreate = async (payload: VariantPayload, media: File[]) => {
+  const handleCreate = async (payload: CreateVariantInput, media: File[]) => {
     await createMutation.mutateAsync({ payload, media });
     setIsAdding(false);
   };
