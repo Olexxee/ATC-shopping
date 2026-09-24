@@ -4,9 +4,12 @@ import type {
   ProductFormVariant,
 } from "../types/product-form.types";
 import type {
-  ProductPayload,
-  ProductVariantInput,
+  CreateAdminProductInput,
+  AdminVariantInput,
 } from "../api/adminProducts.api";
+
+type ProductVariantInput = AdminVariantInput;
+type ProductPayload = CreateAdminProductInput;
 
 const decimalToString = (value: string | number | null | undefined): string => {
   if (value === null || value === undefined) return "";
