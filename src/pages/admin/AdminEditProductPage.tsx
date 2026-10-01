@@ -3,6 +3,45 @@ import { ArrowLeft, Loader2, TriangleAlert } from "lucide-react";
 import { ProductEditor } from "../../features/admin/products/components/ProductEditor";
 import { useAdminProduct } from "../../features/admin/products/hooks/useAdminProduct";
 
+const STATUS_STYLES: Record<string, { badge: string; dot: string }> = {
+  ACTIVE: {
+    badge: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    dot: "bg-emerald-500",
+  },
+  DRAFT: {
+    badge: "bg-amber-50 text-amber-700 ring-amber-200",
+    dot: "bg-amber-500",
+  },
+  ARCHIVED: {
+    badge: "bg-slate-100 text-slate-600 ring-slate-200",
+    dot: "bg-slate-400",
+  },
+};
+
+function StatusBadge({ status }: { status: string }) {
+  const style = STATUS_STYLES[status] ?? STATUS_STYLES.ARCHIVED;
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${style.badge}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
+      {status.charAt(0) + status.slice(1).toLowerCase()}
+    </span>
+  );
+}
+
+function BackLink() {
+  return (
+    <Link
+      to="/admin/products"
+      className="inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-900"
+    >
+      <ArrowLeft size={16} />
+      Back to products
+    </Link>
+  );
+}
+
 export function AdminEditProductPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -32,25 +71,14 @@ export function AdminEditProductPage() {
     return (
       <div className="mx-auto w-full max-w-6xl">
         <div className="mb-8">
-          <Link
-            to="/admin/products"
-            className="inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-900"
-          >
-            <ArrowLeft size={16} />
-            Back to products
-          </Link>
+          <BackLink />
         </div>
 
         <div className="flex min-h-96 items-center justify-center rounded-2xl border border-slate-200 bg-white">
           <div className="flex flex-col items-center gap-3 text-center">
             <Loader2 size={28} className="animate-spin text-slate-400" />
-
             <p className="text-sm font-medium text-slate-700">
               Loading product...
-            </p>
-
-            <p className="text-xs text-slate-500">
-              Fetching the product details.
             </p>
           </div>
         </div>
@@ -74,37 +102,27 @@ export function AdminEditProductPage() {
     );
   }
 
+  const updatedAt = product.updatedAt
+    ? new Date(product.updatedAt).toLocaleDateString(undefined, {
+        dateStyle: "medium",
+      })
+    : null;
+
   return (
     <div className="mx-auto w-full max-w-6xl">
-      <div className="mb-8">
-        <Link
-          to="/admin/products"
-          className="inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-900"
-        >
-          <ArrowLeft size={16} />
-          Back to products
-        </Link>
+      <div className="mb-6">
+        <BackLink />
 
-        <div className="mt-5">
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Catalog
-            </p>
-
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-              {product.status}
-            </span>
-          </div>
-
-          <h1 className="mt-2 text-2xl font-semibold text-slate-900">
-            Edit product
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <h1 className="min-w-0 truncate text-2xl font-semibold text-slate-900">
+            {product.name}
           </h1>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Update the catalog information, variants, images and visibility for{" "}
-            <span className="font-medium text-slate-700">{product.name}</span>.
-          </p>
+          <StatusBadge status={product.status} />
         </div>
+
+        {updatedAt && (
+          <p className="mt-1.5 text-sm text-slate-500">Updated {updatedAt}</p>
+        )}
       </div>
 
       <ProductEditor product={product} />
@@ -122,13 +140,7 @@ function ProductPageError({ title, message, onRetry }: ProductPageErrorProps) {
   return (
     <div className="mx-auto w-full max-w-6xl">
       <div className="mb-8">
-        <Link
-          to="/admin/products"
-          className="inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-900"
-        >
-          <ArrowLeft size={16} />
-          Back to products
-        </Link>
+        <BackLink />
       </div>
 
       <div className="flex min-h-96 items-center justify-center rounded-2xl border border-red-200 bg-red-50">
@@ -138,7 +150,6 @@ function ProductPageError({ title, message, onRetry }: ProductPageErrorProps) {
           </div>
 
           <h2 className="mt-4 text-lg font-semibold text-slate-900">{title}</h2>
-
           <p className="mt-2 text-sm text-slate-600">{message}</p>
 
           <div className="mt-6 flex justify-center gap-3">

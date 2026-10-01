@@ -16,8 +16,9 @@ export function useUpdateProductStatus() {
       productId: string;
       status: ProductStatus;
     }) => updateAdminProductStatus(productId, status),
-    onSuccess: (product, { productId }) => {
-      qc.setQueryData(adminProductKeys.detail(productId), product);
+
+    onSuccess: (_product, { productId }) => {
+      qc.invalidateQueries({ queryKey: adminProductKeys.detail(productId) });
       qc.invalidateQueries({ queryKey: adminProductKeys.lists() });
     },
   });

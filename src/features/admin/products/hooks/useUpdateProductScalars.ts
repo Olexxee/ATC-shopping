@@ -17,9 +17,10 @@ export function useUpdateProductScalars() {
       payload: UpdateAdminProductInput;
     }) => updateAdminProduct(id, payload),
 
-    onSuccess: (product, { id }) => {
-      // Backend returns the full admin detail; trust it, don't merge.
-      qc.setQueryData(adminProductKeys.detail(id), product);
+    onSuccess: (_product, { id }) => {
+      // Refetch instead of trusting the PATCH response: scalar updates must
+      // never be able to overwrite the variants the detail query holds.
+      qc.invalidateQueries({ queryKey: adminProductKeys.detail(id) });
       qc.invalidateQueries({ queryKey: adminProductKeys.lists() });
     },
   });

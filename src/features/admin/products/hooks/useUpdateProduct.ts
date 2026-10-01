@@ -17,8 +17,14 @@ export function useUpdateProduct() {
     mutationFn: ({ productId, payload }: UpdateProductVars) =>
       updateAdminProduct(productId, payload),
 
-    onSuccess: (product, { productId }) => {
-      queryClient.setQueryData(adminProductKeys.detail(productId), product);
+    onSuccess: (_product, { productId }) => {
+      // Do NOT seed the detail cache from the PATCH response. Variants are
+      // owned by their own endpoints, so this response can be missing or
+      // stale on variants. Refetch the detail so the UI shows what the
+      // server actually has.
+      queryClient.invalidateQueries({
+        queryKey: adminProductKeys.detail(productId),
+      });
       queryClient.invalidateQueries({ queryKey: adminProductKeys.lists() });
     },
   });
