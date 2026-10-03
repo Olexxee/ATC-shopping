@@ -1,6 +1,5 @@
 import { ArrowLeft, Search, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-
 import { SourcingRequestForm } from "../../features/sourcing/components/SourcingRequestForm";
 
 /* ------------------------------------------------------------------ */

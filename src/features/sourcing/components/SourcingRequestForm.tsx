@@ -5,9 +5,23 @@ import {
   useRef,
   useState,
 } from "react";
-import { ImagePlus, Link as LinkIcon, Loader2, Upload, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {
+  ArrowRight,
+  CheckCircle2,
+  ImagePlus,
+  Link as LinkIcon,
+  Loader2,
+  Package,
+  RotateCcw,
+  Upload,
+  X,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 import { useCreateSourcingRequest } from "../sourcing.mutations";
+import type {
+  CreateSourcingRequestResponse,
+  SourcingProductReference,
+} from "../sourcing.types";
 
 /* ------------------------------------------------------------------ */
 /* Constants                                                          */
@@ -34,11 +48,51 @@ interface ImagePreview {
 }
 
 /* ------------------------------------------------------------------ */
+/* Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
+const getProductImage = (product: SourcingProductReference) => {
+  const variantWithImage = product.variants.find(
+    (variant) => variant.media.length > 0,
+  );
+
+  if (!variantWithImage) {
+    return null;
+  }
+
+  const primaryImage =
+    variantWithImage.media.find((media) => media.isPrimary) ??
+    variantWithImage.media[0];
+
+  return primaryImage?.url ?? null;
+};
+
+const getProductPrice = (product: SourcingProductReference) => {
+  const activeVariant = product.variants.find(
+    (variant) => variant.isActive && variant.stock > 0,
+  );
+
+  if (activeVariant) {
+    return activeVariant.price;
+  }
+
+  const firstVariant = product.variants[0];
+
+  return firstVariant?.price ?? null;
+};
+
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    maximumFractionDigits: 0,
+  }).format(price);
+
+/* ------------------------------------------------------------------ */
 /* Component                                                          */
 /* ------------------------------------------------------------------ */
 
 export function SourcingRequestForm() {
-  const navigate = useNavigate();
   const createRequest = useCreateSourcingRequest();
 
   const [title, setTitle] = useState("");
@@ -46,18 +100,17 @@ export function SourcingRequestForm() {
   const [referenceUrl, setReferenceUrl] = useState("");
   const [images, setImages] = useState<ImagePreview[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<CreateSourcingRequestResponse | null>(
+    null,
+  );
 
   /*
    * Mirror `images` into a ref so the unmount cleanup can read the
-   * *latest* value without re-registering the effect on every change.
+   * latest value without re-registering the effect on every change.
    *
    * If the cleanup effect depended on `[images]`, React would run its
    * cleanup before every re-registration — revoking blob URLs that are
-   * still being rendered in the preview grid. Adding a second image
-   * would blank out the first one's preview.
-   *
-   * The ref indirection keeps the effect mount-only while still seeing
-   * the final image list at unmount time.
+   * still being rendered in the preview grid.
    */
   const imagesRef = useRef<ImagePreview[]>([]);
 
@@ -136,6 +189,7 @@ export function SourcingRequestForm() {
     event.preventDefault();
 
     setError(null);
+    setResult(null);
 
     const trimmedTitle = title.trim();
     const trimmedDescription = description.trim();
@@ -147,20 +201,28 @@ export function SourcingRequestForm() {
     }
 
     try {
-      const result = await createRequest.mutateAsync({
+      const response = await createRequest.mutateAsync({
         title: trimmedTitle,
         description: trimmedDescription || null,
         referenceUrl: trimmedUrl || null,
         referenceImages: images.map((image) => image.file),
       });
 
-      if (result.type === "CATALOG_MATCH" && result.match?.product?.slug) {
-        navigate(`/products/${result.match.product.slug}`);
+      /*
+       * If AI + catalog matching found an existing product, keep the
+       * customer on this page and show the product suggestion.
+       */
+      if (response.type === "CATALOG_MATCH" && response.match?.product) {
+        setResult(response);
         return;
       }
 
-      if (result.request?.id) {
-        navigate(`/sourcing/${result.request.id}`);
+      /*
+       * No catalog match means a sourcing request was created.
+       * Send the customer to the existing request tracking page.
+       */
+      if (response.request?.id) {
+        window.location.assign(`/sourcing/${response.request.id}`);
         return;
       }
 
@@ -176,7 +238,25 @@ export function SourcingRequestForm() {
     }
   };
 
+  const handleTryAgain = () => {
+    setResult(null);
+    setError(null);
+  };
+
   const isSubmitting = createRequest.isPending;
+
+  /* ---------------------------------------------------------------- */
+  /* Catalog match                                                    */
+  /* ---------------------------------------------------------------- */
+
+  if (result?.type === "CATALOG_MATCH" && result.match?.product) {
+    return (
+      <CatalogMatchResult
+        product={result.match.product}
+        onTryAgain={handleTryAgain}
+      />
+    );
+  }
 
   /* ---------------------------------------------------------------- */
   /* Render                                                           */
@@ -377,5 +457,111 @@ export function SourcingRequestForm() {
         </div>
       </div>
     </form>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Catalog Match Result                                               */
+/* ------------------------------------------------------------------ */
+
+interface CatalogMatchResultProps {
+  product: SourcingProductReference;
+  onTryAgain: () => void;
+}
+
+function CatalogMatchResult({ product, onTryAgain }: CatalogMatchResultProps) {
+  const imageUrl = getProductImage(product);
+  const price = getProductPrice(product);
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-200 px-6 py-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+            <CheckCircle2 size={21} />
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">
+              We found a match
+            </h2>
+
+            <p className="mt-0.5 text-sm text-slate-500">
+              This product is already available in the Keplex catalog.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6">
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="grid sm:grid-cols-[180px_1fr]">
+            <div className="aspect-square bg-slate-100 sm:aspect-auto">
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={product.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full min-h-44 items-center justify-center text-slate-400">
+                  <Package size={40} strokeWidth={1.5} />
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col justify-center p-5 sm:p-6">
+              <div className="flex items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                    Catalog product
+                  </p>
+
+                  <h3 className="mt-1 text-lg font-semibold text-slate-900">
+                    {product.name}
+                  </h3>
+                </div>
+              </div>
+
+              {product.brand && (
+                <p className="mt-2 text-sm text-slate-500">
+                  {product.brand.name}
+                </p>
+              )}
+
+              {price !== null && (
+                <p className="mt-4 text-lg font-semibold text-slate-900">
+                  {formatPrice(price)}
+                </p>
+              )}
+
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  to={`/products/${product.slug}`}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  View product
+                  <ArrowRight size={16} />
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={onTryAgain}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  <RotateCcw size={16} />
+                  Try another
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-4 text-xs leading-5 text-slate-400">
+          You can view the product, choose your preferred variant, and continue
+          with the normal Keplex shopping experience.
+        </p>
+      </div>
+    </div>
   );
 }

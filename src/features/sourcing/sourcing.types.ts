@@ -158,12 +158,7 @@ export interface CreateSourcingRequestResponse {
   type: SourcingResultType;
   analysis: SourcingAIAnalysis;
   match?: {
-    product: {
-      id: string;
-      name: string;
-      slug: string;
-      score: number;
-    };
+    product: SourcingProductReference;
     score: number;
   } | null;
   request?: SourcingRequest;
