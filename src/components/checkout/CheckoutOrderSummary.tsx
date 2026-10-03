@@ -1,16 +1,26 @@
 import { Loader2, ShoppingBag } from "lucide-react";
-import type { Cart } from "../../features/cart/cart.types";
+
 import type { Address } from "../../features/address/address.types";
+import type { Cart } from "../../features/cart/cart.types";
+
+type PaymentMode = "FULL" | "FLEXPAY";
 
 interface CheckoutOrderSummaryProps {
   cart: Cart;
   selectedAddress?: Address;
+  paymentMode: PaymentMode;
   isSubmitting: boolean;
   onSubmit: () => void;
+
+  flexPaySubtotal: number;
+  flexPayItemCount: number;
+  canContinueFlexPay: boolean;
 }
 
 const formatCurrency = (value: number | string) => {
-  return `₦${Number(value || 0).toLocaleString("en-NG", {
+  const amount = Number(value);
+
+  return `₦${(Number.isFinite(amount) ? amount : 0).toLocaleString("en-NG", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
@@ -19,24 +29,43 @@ const formatCurrency = (value: number | string) => {
 export default function CheckoutOrderSummary({
   cart,
   selectedAddress,
+  paymentMode,
   isSubmitting,
   onSubmit,
+  flexPaySubtotal,
+  flexPayItemCount,
+  canContinueFlexPay,
 }: CheckoutOrderSummaryProps) {
+  const isFlexPay = paymentMode === "FLEXPAY";
+
+  const displaySubtotal = isFlexPay
+    ? flexPaySubtotal
+    : Number(cart.subtotal ?? 0);
+
+  const displayItemCount = isFlexPay ? flexPayItemCount : cart.totalItems;
+
+  const isSubmitDisabled =
+    isSubmitting || !selectedAddress || (isFlexPay && !canContinueFlexPay);
+
   return (
     <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+      {/* HEADER */}
+
       <div className="flex items-center gap-2">
         <ShoppingBag className="h-5 w-5 text-gray-700" />
 
         <h2 className="font-semibold text-gray-900">Order summary</h2>
       </div>
 
+      {/* ITEMS */}
+
       <div className="mt-6 space-y-4">
         {cart.items.map((item) => {
-          const productName = item.variant?.product?.name || "Product";
+          const productName = item.variant?.product?.name ?? "Product";
 
           const image =
-            item.variant?.images?.find((media) => media.isPrimary)?.url ||
-            item.variant?.images?.[0]?.url ||
+            item.variant?.images?.find((media) => media.isPrimary)?.url ??
+            item.variant?.images?.[0]?.url ??
             null;
 
           return (
@@ -87,22 +116,26 @@ export default function CheckoutOrderSummary({
 
       <div className="my-6 border-t border-gray-200" />
 
+      {/* TOTALS */}
+
       <div className="space-y-3 text-sm">
         <div className="flex justify-between gap-4">
           <span className="text-gray-500">
-            Subtotal ({cart.totalItems}{" "}
-            {cart.totalItems === 1 ? "item" : "items"})
+            Subtotal ({displayItemCount}{" "}
+            {displayItemCount === 1 ? "item" : "items"})
           </span>
 
           <span className="font-medium text-gray-900">
-            {formatCurrency(cart.subtotal)}
+            {formatCurrency(displaySubtotal)}
           </span>
         </div>
 
         <div className="flex justify-between gap-4">
           <span className="text-gray-500">Shipping</span>
 
-          <span className="text-gray-500">Calculated at checkout</span>
+          <span className="text-right text-gray-500">
+            {isFlexPay ? "Calculated after payment" : "Calculated at checkout"}
+          </span>
         </div>
 
         <div className="flex justify-between gap-4">
@@ -114,15 +147,32 @@ export default function CheckoutOrderSummary({
 
       <div className="my-6 border-t border-gray-200" />
 
+      {/* TOTAL */}
+
       <div className="flex items-center justify-between gap-4">
         <span className="text-base font-semibold text-gray-900">
-          Estimated total
+          {isFlexPay ? "Product total" : "Estimated total"}
         </span>
 
         <span className="text-xl font-bold text-gray-900">
-          {formatCurrency(cart.subtotal)}
+          {formatCurrency(displaySubtotal)}
         </span>
       </div>
+
+      {/* FLEXPAY NOTICE */}
+
+      {isFlexPay && (
+        <div className="mt-5 rounded-xl bg-gray-50 p-3">
+          <p className="text-xs font-semibold text-gray-700">Keplex FlexPay</p>
+
+          <p className="mt-1 text-xs leading-5 text-gray-500">
+            Your first payment is made now. Shipping is calculated separately
+            after your product balance is fully paid.
+          </p>
+        </div>
+      )}
+
+      {/* ADDRESS */}
 
       {selectedAddress && (
         <div className="mt-5 rounded-xl bg-gray-50 p-3">
@@ -141,25 +191,34 @@ export default function CheckoutOrderSummary({
         </div>
       )}
 
+      {/* FLEXPAY VALIDATION */}
+
+      {isFlexPay && !canContinueFlexPay && (
+        <p className="mt-4 text-center text-xs leading-5 text-red-600">
+          Select at least one valid product for FlexPay to continue.
+        </p>
+      )}
+
+      {/* CTA */}
+
       <button
         type="button"
         onClick={onSubmit}
-        disabled={isSubmitting || !selectedAddress}
+        disabled={isSubmitDisabled}
         className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSubmitting ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Creating order...
+
+            {isFlexPay ? "Preparing payment..." : "Creating order..."}
           </>
+        ) : isFlexPay ? (
+          "Continue with FlexPay"
         ) : (
           "Place order"
         )}
       </button>
-
-      {/* <p className="mt-3 text-center text-xs text-gray-400">
-        Your final shipping cost will be calculated by Keplex.
-      </p> */}
     </section>
   );
 }

@@ -1,10 +1,12 @@
 import {
   BarChart3,
   Boxes,
+  CreditCard,
   FolderTree,
   Layers3,
   MessageSquareText,
   Package,
+  PackageSearch,
   Settings,
   ShoppingCart,
   Store,
@@ -15,12 +17,25 @@ import {
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
-interface AdminSidebarProps {
-  mobileOpen?: boolean;
-  onMobileClose?: () => void;
+/* ============================================================
+ * NAVIGATION CONFIG
+ *
+ * Grouped to match the admin route tree in AppRoutes.tsx.
+ * Section labels are cosmetic; ordering mirrors the route file.
+ * ========================================================== */
+
+interface NavItem {
+  label: string;
+  to: string;
+  icon: typeof BarChart3;
 }
 
-const navigation = [
+interface NavSection {
+  section: string;
+  items: NavItem[];
+}
+
+const navigation: NavSection[] = [
   {
     section: "Overview",
     items: [
@@ -35,6 +50,11 @@ const navigation = [
   {
     section: "Catalog",
     items: [
+      {
+        label: "Sourcing",
+        to: "/admin/sourcing",
+        icon: PackageSearch,
+      },
       {
         label: "Products",
         to: "/admin/products",
@@ -77,6 +97,11 @@ const navigation = [
         icon: ShoppingCart,
       },
       {
+        label: "FlexPay",
+        to: "/admin/flexpay",
+        icon: CreditCard,
+      },
+      {
         label: "Customers",
         to: "/admin/customers",
         icon: Users,
@@ -111,6 +136,15 @@ const navigation = [
   },
 ];
 
+/* ============================================================
+ * SIDEBAR
+ * ========================================================== */
+
+interface AdminSidebarProps {
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+}
+
 export function AdminSidebar({
   mobileOpen = false,
   onMobileClose,
@@ -118,8 +152,9 @@ export function AdminSidebar({
   return (
     <>
       {/* ============================================================
-          DESKTOP SIDEBAR
-      ============================================================ */}
+       * DESKTOP
+       * ========================================================== */}
+
       <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white lg:block">
         <div className="sticky top-0 flex h-[calc(100vh-4rem)] flex-col overflow-y-auto p-4">
           <SidebarNavigation />
@@ -127,8 +162,9 @@ export function AdminSidebar({
       </aside>
 
       {/* ============================================================
-          MOBILE SIDEBAR
-      ============================================================ */}
+       * MOBILE
+       * ========================================================== */}
+
       <div
         className={[
           "fixed inset-0 z-50 lg:hidden",
@@ -154,7 +190,7 @@ export function AdminSidebar({
             mobileOpen ? "translate-x-0" : "-translate-x-full",
           ].join(" ")}
         >
-          {/* Mobile drawer header */}
+          {/* Drawer header */}
           <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-4">
             <div>
               <span className="font-semibold tracking-tight text-slate-900">
@@ -167,14 +203,14 @@ export function AdminSidebar({
             <button
               type="button"
               onClick={onMobileClose}
-              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
               aria-label="Close navigation menu"
+              className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
             >
               <X size={20} />
             </button>
           </div>
 
-          {/* Navigation */}
+          {/* Drawer navigation */}
           <div className="flex-1 overflow-y-auto p-4">
             <SidebarNavigation onNavigate={onMobileClose} />
           </div>
@@ -183,6 +219,10 @@ export function AdminSidebar({
     </>
   );
 }
+
+/* ============================================================
+ * NAVIGATION BODY
+ * ========================================================== */
 
 interface SidebarNavigationProps {
   onNavigate?: () => void;
@@ -198,31 +238,40 @@ function SidebarNavigation({ onNavigate }: SidebarNavigationProps) {
           </p>
 
           <div className="space-y-1">
-            {group.items.map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  onClick={onNavigate}
-                  className={({ isActive }) =>
-                    [
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition",
-                      isActive
-                        ? "bg-slate-100 font-medium text-slate-900"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
-                    ].join(" ")
-                  }
-                >
-                  <Icon size={17} />
-                  <span>{item.label}</span>
-                </NavLink>
-              );
-            })}
+            {group.items.map((item) => (
+              <SidebarLink key={item.to} item={item} onNavigate={onNavigate} />
+            ))}
           </div>
         </div>
       ))}
     </nav>
+  );
+}
+
+function SidebarLink({
+  item,
+  onNavigate,
+}: {
+  item: NavItem;
+  onNavigate?: () => void;
+}) {
+  const Icon = item.icon;
+
+  return (
+    <NavLink
+      to={item.to}
+      onClick={onNavigate}
+      className={({ isActive }) =>
+        [
+          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition",
+          isActive
+            ? "bg-slate-100 font-medium text-slate-900"
+            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+        ].join(" ")
+      }
+    >
+      <Icon size={17} />
+      <span>{item.label}</span>
+    </NavLink>
   );
 }

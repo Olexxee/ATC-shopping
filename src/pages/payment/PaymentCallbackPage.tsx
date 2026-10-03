@@ -11,13 +11,32 @@ interface PaymentVerificationResponse {
       id: string;
       reference: string;
       status: string;
-      orderId?: string | null;
       provider?: string;
+      paymentType?: string;
+      installmentPlanId?: string | null;
+      orderId?: string | null;
     };
+
     order?: {
       id: string;
       orderNumber: string;
       status: string;
+    } | null;
+
+    plan?: {
+      id: string;
+      planNumber: string;
+      status: string;
+      balanceDue: number | string;
+      orderId?: string | null;
+    } | null;
+
+    installmentPlan?: {
+      id: string;
+      planNumber: string;
+      status: string;
+      balanceDue: number | string;
+      orderId?: string | null;
     } | null;
   };
 }
@@ -28,23 +47,19 @@ export default function PaymentCallbackPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const [state, setState] =
-    useState<VerificationState>("verifying");
+  const [state, setState] = useState<VerificationState>("verifying");
 
-  const [message, setMessage] = useState(
-    "Confirming your payment...",
-  );
+  const [message, setMessage] = useState("Confirming your payment...");
+
+  const [isFlexPay, setIsFlexPay] = useState(false);
 
   useEffect(() => {
     const reference =
-      searchParams.get("reference") ||
-      searchParams.get("trxref");
+      searchParams.get("reference") || searchParams.get("trxref");
 
     if (!reference) {
       setState("failed");
-      setMessage(
-        "We could not find your payment reference.",
-      );
+      setMessage("We could not find your payment reference.");
       return;
     }
 
@@ -52,10 +67,9 @@ export default function PaymentCallbackPage() {
 
     const verifyPayment = async () => {
       try {
-        const response =
-          await api.get<PaymentVerificationResponse>(
-            `/api/payments/verify/${encodeURIComponent(reference)}`,
-          );
+        const response = await api.get<PaymentVerificationResponse>(
+          `/api/payments/verify/${encodeURIComponent(reference)}`,
+        );
 
         if (cancelled) {
           return;
@@ -65,35 +79,83 @@ export default function PaymentCallbackPage() {
 
         if (!result.success) {
           setState("failed");
-          setMessage(
-            result.message ||
-              "We could not verify your payment.",
-          );
+          setMessage(result.message || "We could not verify your payment.");
           return;
         }
 
-        const orderId = result.data?.order?.id;
+        const payment = result.data?.payment;
 
-        if (!orderId) {
-          setState("failed");
+        const paymentIsFlexPay =
+          payment?.paymentType === "INSTALLMENT_PAYMENT" ||
+          Boolean(payment?.installmentPlanId) ||
+          Boolean(result.data?.plan) ||
+          Boolean(result.data?.installmentPlan);
+
+        setIsFlexPay(paymentIsFlexPay);
+
+        // ------------------------------------------------------
+        // ORDER CREATED
+        // ------------------------------------------------------
+
+        const orderId =
+          result.data?.order?.id ??
+          payment?.orderId ??
+          result.data?.plan?.orderId ??
+          result.data?.installmentPlan?.orderId ??
+          null;
+
+        if (orderId) {
+          setState("success");
           setMessage(
-            "Payment was verified, but the order could not be identified.",
+            paymentIsFlexPay
+              ? "Your FlexPay payment completed and your order is ready. Redirecting..."
+              : "Payment confirmed. Redirecting to your order...",
           );
+
+          setTimeout(() => {
+            if (!cancelled) {
+              navigate(`/orders/${orderId}`, {
+                replace: true,
+              });
+            }
+          }, 1200);
+
           return;
         }
 
-        setState("success");
-        setMessage(
-          "Payment confirmed. Redirecting to your order...",
-        );
+        // ------------------------------------------------------
+        // FLEXPAY PAYMENT WITHOUT ORDER
+        //
+        // This is expected for normal FlexPay installments.
+        // The product balance can still be outstanding.
+        // ------------------------------------------------------
 
-        setTimeout(() => {
-          if (!cancelled) {
-            navigate(`/orders/${orderId}`, {
-              replace: true,
-            });
+        if (paymentIsFlexPay) {
+          const plan = result.data?.plan ?? result.data?.installmentPlan;
+
+          if (plan?.status === "SHIPPING_DUE") {
+            setState("success");
+            setMessage(
+              "Payment confirmed. Your product balance is paid and shipping payment is now due.",
+            );
+            return;
           }
-        }, 1200);
+
+          setState("success");
+          setMessage(
+            "Payment confirmed. Your FlexPay plan has been updated successfully.",
+          );
+          return;
+        }
+
+        // ------------------------------------------------------
+        // NON-FLEXPAY PAYMENT WITHOUT ORDER
+        // ------------------------------------------------------
+
+        setState("failed");
+        setMessage(
+          "Payment was verified, but the order could not be identified.",
+        );
       } catch (error) {
         if (cancelled) {
           return;
@@ -104,9 +166,7 @@ export default function PaymentCallbackPage() {
         if (error instanceof Error) {
           setMessage(error.message);
         } else {
-          setMessage(
-            "We could not verify your payment. Please try again.",
-          );
+          setMessage("We could not verify your payment. Please try again.");
         }
       }
     };
@@ -117,6 +177,10 @@ export default function PaymentCallbackPage() {
       cancelled = true;
     };
   }, [navigate, searchParams]);
+
+  // ----------------------------------------------------------
+  // VERIFYING
+  // ----------------------------------------------------------
 
   if (state === "verifying") {
     return (
@@ -130,9 +194,7 @@ export default function PaymentCallbackPage() {
             Confirming your payment
           </h1>
 
-          <p className="mt-2 text-sm leading-6 text-gray-500">
-            {message}
-          </p>
+          <p className="mt-2 text-sm leading-6 text-gray-500">{message}</p>
 
           <p className="mt-6 text-xs text-gray-400">
             Please don't close this page.
@@ -141,6 +203,10 @@ export default function PaymentCallbackPage() {
       </main>
     );
   }
+
+  // ----------------------------------------------------------
+  // SUCCESS
+  // ----------------------------------------------------------
 
   if (state === "success") {
     return (
@@ -151,16 +217,42 @@ export default function PaymentCallbackPage() {
           </div>
 
           <h1 className="mt-6 text-xl font-bold text-gray-900">
-            Payment successful
+            {isFlexPay ? "FlexPay payment successful" : "Payment successful"}
           </h1>
 
-          <p className="mt-2 text-sm leading-6 text-gray-500">
-            {message}
-          </p>
+          <p className="mt-2 text-sm leading-6 text-gray-500">{message}</p>
+
+          {!isFlexPay && (
+            <p className="mt-5 text-xs text-gray-400">
+              Redirecting to your order...
+            </p>
+          )}
+
+          {isFlexPay && (
+            <div className="mt-6 flex flex-col gap-3">
+              <Link
+                to="/account"
+                className="rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800"
+              >
+                Go to my account
+              </Link>
+
+              <Link
+                to="/"
+                className="text-sm font-medium text-gray-500 transition hover:text-gray-900"
+              >
+                Continue shopping
+              </Link>
+            </div>
+          )}
         </div>
       </main>
     );
   }
+
+  // ----------------------------------------------------------
+  // FAILED
+  // ----------------------------------------------------------
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
@@ -173,9 +265,7 @@ export default function PaymentCallbackPage() {
           Payment verification failed
         </h1>
 
-        <p className="mt-2 text-sm leading-6 text-gray-500">
-          {message}
-        </p>
+        <p className="mt-2 text-sm leading-6 text-gray-500">{message}</p>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button
@@ -197,11 +287,3 @@ export default function PaymentCallbackPage() {
     </main>
   );
 }
-
-// The important change is simply that this page no longer says **“with Paystack”**. It can now serve as the generic payment verification destination.
-
-// However, **this is not where we add the pawaPay UI**.
-
-// The pawaPay-specific UI belongs on your **checkout/payment selection screen**, where the customer chooses how to pay and enters their mobile-money phone number.
-
-// Paste that checkout/payment component next. That's the file we should modify.

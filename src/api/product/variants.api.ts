@@ -1,4 +1,3 @@
-// variant.api.ts
 import { api } from "../../lib/api";
 import type { AdminVariant } from "./product.contract";
 

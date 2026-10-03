@@ -30,25 +30,18 @@ export interface CartVariant {
   sku: string;
   color: string | null;
   size: string | null;
-
   price: number;
   weight: number;
   stock: number;
   isActive: boolean;
-
   fulfillmentType: "LOCAL" | "IMPORT" | "PREORDER" | "DIGITAL";
-
   shippingType: "LOCAL" | "IMPORT" | "SEA" | "AIR";
-
   length: number | null;
   width: number | null;
   height: number | null;
-
   cbm: number | null;
   actualWeight: number | null;
-
   images: CartMedia[];
-
   product: CartProduct | null;
 }
 
@@ -77,18 +70,12 @@ export interface Cart {
   id: string;
   status: string;
   userId: string;
-
   items: CartItem[];
-
   subtotal: number;
-
   totalWeight: number;
   totalCBM: number;
-
   cbmItems: CBMItem[];
-
   totalItems: number;
-
   createdAt: string;
   updatedAt: string;
 }
