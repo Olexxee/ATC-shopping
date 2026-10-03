@@ -1,5 +1,4 @@
 import { SlidersHorizontal, X } from "lucide-react";
-
 import type {
   ProductListingState,
   ProductSortValue,
@@ -8,15 +7,10 @@ import { ProductSort } from "./ProductSort";
 
 interface ProductToolbarProps {
   resultCount: number;
-
   state: ProductListingState;
-
   onSortChange: (sort: ProductSortValue) => void;
-
   onFiltersOpen: () => void;
-
   onClearFilters?: () => void;
-
   showFilterButton?: boolean;
 }
 
@@ -49,7 +43,7 @@ export function ProductToolbar({
           justify-between
           gap-4
           border-y
-          border-neutral-200
+          border-[var(--border)]
           py-3
         "
       >
@@ -64,37 +58,50 @@ export function ProductToolbar({
                 shrink-0
                 items-center
                 gap-2
-                rounded-full
+                rounded-lg
                 border
-                border-neutral-200
-                px-4
+                border-[var(--border)]
+                bg-white
+                px-3
                 text-sm
                 font-medium
-                text-neutral-900
-                transition
-                hover:border-neutral-900
+                text-[var(--text-primary)]
+                transition-colors
+                duration-200
+                hover:border-[var(--border-strong)]
+                hover:bg-[var(--surface)]
+                hover:text-[var(--brand)]
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-[var(--brand)]
+                focus-visible:ring-offset-2
                 lg:hidden
               "
             >
-              <SlidersHorizontal size={16} />
+              <SlidersHorizontal size={16} strokeWidth={1.8} />
               Filters
             </button>
           )}
 
-          <p className="truncate text-sm text-neutral-500">
-            <span className="font-medium text-neutral-900">
+          <p className="truncate text-sm text-[var(--text-secondary)]">
+            <span className="font-medium text-[var(--text-primary)]">
               {resultCount.toLocaleString()}
             </span>{" "}
             {resultCount === 1 ? "product" : "products"}
           </p>
         </div>
 
-        <ProductSort value={state.sort} onChange={onSortChange} />
+        <ProductSort
+          value={state.sort}
+          onChange={onSortChange}
+        />
       </div>
 
       {hasFilters && onClearFilters && (
         <div className="flex items-center justify-between gap-4">
-          <p className="text-xs text-neutral-500">Filters applied</p>
+          <p className="text-xs text-[var(--text-muted)]">
+            Filters applied
+          </p>
 
           <button
             type="button"
@@ -105,12 +112,17 @@ export function ProductToolbar({
               gap-1.5
               text-xs
               font-medium
-              text-neutral-700
-              transition
-              hover:text-neutral-950
+              text-[var(--text-secondary)]
+              transition-colors
+              duration-200
+              hover:text-[var(--brand)]
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-[var(--brand)]
+              focus-visible:ring-offset-2
             "
           >
-            <X size={14} />
+            <X size={14} strokeWidth={1.8} />
             Clear filters
           </button>
         </div>

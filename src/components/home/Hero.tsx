@@ -1,3 +1,6 @@
+import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+
 export function Hero() {
   return (
     <section className="overflow-hidden bg-neutral-100">
@@ -18,33 +21,74 @@ export function Hero() {
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a
-              href="/shop"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-neutral-950 px-7 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+            <Link
+              to="/products"
+              className="
+                inline-flex
+                h-12
+                items-center
+                justify-center
+                gap-2
+                rounded-lg
+                bg-[var(--brand)]
+                px-7
+                text-sm
+                font-semibold
+                text-[var(--brand-foreground)]
+                transition-colors
+                duration-200
+                hover:bg-[var(--brand-hover)]
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-[var(--brand)]
+                focus-visible:ring-offset-2
+              "
             >
-              Shop products
-            </a>
+              Browse catalog
+              <ArrowRight size={17} />
+            </Link>
 
-            <a
-              href="/importation"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-neutral-300 bg-white px-7 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-50"
+            <Link
+              to="/sourcing"
+              className="
+                inline-flex
+                h-12
+                items-center
+                justify-center
+                rounded-lg
+                border
+                border-neutral-300
+                bg-white
+                px-7
+                text-sm
+                font-semibold
+                text-neutral-900
+                transition-colors
+                duration-200
+                hover:border-neutral-400
+                hover:bg-neutral-50
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-[var(--brand)]
+                focus-visible:ring-offset-2
+              "
             >
-              Explore importation
-            </a>
+              Can't find something?
+            </Link>
           </div>
         </div>
 
         {/* Visual */}
         <div className="relative">
-          <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-neutral-200 md:aspect-[4/5] lg:aspect-[5/6]">
+          <div className="aspect-[4/5] overflow-hidden rounded-xl bg-neutral-200 lg:aspect-[5/6]">
             <img
               src="/hero-importation.jpg"
-              alt=""
+              alt="Products sourced from international markets"
               className="h-full w-full object-cover"
             />
           </div>
 
-          <div className="absolute bottom-5 left-5 rounded-xl bg-white/95 px-5 py-4 shadow-lg backdrop-blur-sm">
+          <div className="absolute bottom-5 left-5 rounded-lg bg-white/95 px-5 py-4 shadow-lg backdrop-blur-sm">
             <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
               Import with confidence
             </p>

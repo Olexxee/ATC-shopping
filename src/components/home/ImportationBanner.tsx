@@ -1,12 +1,7 @@
 import { ArrowRight, PackageSearch, Sparkles, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
-
 import { Container } from "../layout/Container";
 import { Section } from "../layout/Section";
-
-/* ============================================================
- * FEATURES
- * ========================================================== */
 
 const FEATURES = [
   {
@@ -29,79 +24,223 @@ const FEATURES = [
   },
 ];
 
-/* ============================================================
- * BANNER
- * ========================================================== */
-
 export function ImportationBanner() {
   return (
-    <Section className="relative overflow-hidden bg-slate-950">
-      {/* Ambient background glow */}
+    <Section className="relative overflow-hidden bg-[var(--surface-dark)]">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-60"
+        className="pointer-events-none absolute inset-0"
       >
-        <div className="absolute -top-40 -right-20 h-96 w-96 rounded-full bg-slate-800/60 blur-3xl" />
-        <div className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-slate-800/40 blur-3xl" />
+        <div
+          className="
+            absolute
+            -right-24
+            -top-32
+            h-96
+            w-96
+            rounded-full
+            bg-[var(--brand)]
+            opacity-10
+            blur-3xl
+          "
+        />
+
+        <div
+          className="
+            absolute
+            -bottom-40
+            -left-32
+            h-96
+            w-96
+            rounded-full
+            bg-white
+            opacity-[0.03]
+            blur-3xl
+          "
+        />
       </div>
 
       <Container>
-        <div className="relative grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
-          {/* ------------------------------------------------------------
-           * Content
-           * ---------------------------------------------------------- */}
-
+        <div
+          className="
+            relative
+            grid
+            items-center
+            gap-12
+            lg:grid-cols-[1.1fr_0.9fr]
+            lg:gap-16
+          "
+        >
           <div className="max-w-2xl">
-            {/* Badge */}
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-slate-200">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span
+              className="
+                inline-flex
+                items-center
+                gap-2
+                rounded-md
+                border
+                border-white/10
+                bg-white/[0.04]
+                px-3
+                py-1.5
+                text-[11px]
+                font-semibold
+                uppercase
+                tracking-[0.16em]
+                text-white/75
+              "
+            >
+              <span
+                className="
+                  h-1.5
+                  w-1.5
+                  rounded-full
+                  bg-[var(--brand-400)]
+                "
+              />
+
               Global sourcing
             </span>
 
-            {/* Heading — explicit text-white */}
-            <h2 className="mt-6 text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-[2.75rem] lg:leading-[1.1]">
+            <h2
+              className="
+                mt-6
+                text-3xl
+                font-semibold
+                tracking-tight
+                text-white
+                sm:text-4xl
+                lg:text-[2.75rem]
+                lg:leading-[1.1]
+              "
+            >
               Can't find what
               <br className="hidden sm:block" /> you're looking for?
             </h2>
 
-            {/* Body — explicit text-slate-300 (lighter than before for contrast) */}
-            <p className="mt-5 max-w-xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
+            <p
+              className="
+                mt-5
+                max-w-xl
+                text-base
+                leading-7
+                text-white/65
+                sm:text-lg
+                sm:leading-8
+              "
+            >
               Send us the product name, a link, or a photo. We'll search our
               catalog first — and if it's not there, we'll source it from
               international markets and bring it to you.
             </p>
 
-            {/* CTAs */}
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div
+              className="
+                mt-7
+                flex
+                flex-col
+                gap-3
+                sm:flex-row
+                sm:items-center
+              "
+            >
               <Link
                 to="/sourcing"
-                className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-slate-950 transition-all hover:bg-slate-100 hover:shadow-lg hover:shadow-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                className="
+                  group
+                  inline-flex
+                  h-10
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-md
+                  bg-white
+                  px-5
+                  text-sm
+                  font-semibold
+                  text-[var(--text-primary)]
+                  transition-colors
+                  duration-200
+                  hover:bg-[var(--brand-soft)]
+                  hover:text-[var(--brand)]
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-white
+                  focus-visible:ring-offset-2
+                  focus-visible:ring-offset-[var(--surface-dark)]
+                "
               >
                 Start a sourcing request
+
                 <ArrowRight
-                  size={17}
-                  className="transition-transform duration-200 group-hover:translate-x-0.5"
+                  size={16}
+                  strokeWidth={1.8}
+                  className="
+                    transition-transform
+                    duration-200
+                    group-hover:translate-x-0.5
+                  "
                 />
               </Link>
 
               <Link
                 to="/products"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-slate-700 bg-transparent px-6 text-sm font-semibold text-slate-100 transition-colors hover:border-slate-600 hover:bg-slate-900 hover:text-white"
+                className="
+                  inline-flex
+                  h-10
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-md
+                  border
+                  border-white/20
+                  bg-transparent
+                  px-5
+                  text-sm
+                  font-semibold
+                  !text-white
+                  transition-colors
+                  duration-200
+                  hover:border-white/35
+                  hover:bg-white/[0.06]
+                  hover:!text-white
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-white
+                  focus-visible:ring-offset-2
+                  focus-visible:ring-offset-[var(--surface-dark)]
+                "
               >
                 Browse catalog
               </Link>
             </div>
 
-            {/* Mobile / tablet feature list */}
-            <ul className="mt-8 grid gap-3 text-sm text-slate-300 lg:hidden">
+            <ul
+              className="
+                mt-8
+                grid
+                gap-3
+                text-sm
+                text-white/65
+                lg:hidden
+              "
+            >
               {FEATURES.map((feature) => {
                 const Icon = feature.icon;
 
                 return (
-                  <li key={feature.title} className="flex items-start gap-3">
+                  <li
+                    key={feature.title}
+                    className="flex items-start gap-3"
+                  >
                     <Icon
                       size={17}
-                      className="mt-0.5 shrink-0 text-slate-400"
+                      strokeWidth={1.8}
+                      className="
+                        mt-0.5
+                        shrink-0
+                        text-[var(--brand-400)]
+                      "
                     />
 
                     <span>{feature.title}</span>
@@ -111,12 +250,18 @@ export function ImportationBanner() {
             </ul>
           </div>
 
-          {/* ------------------------------------------------------------
-           * Visual / flow panel
-           * ---------------------------------------------------------- */}
-
           <div className="relative hidden lg:block">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+            <div
+              className="
+                relative
+                aspect-[4/3]
+                overflow-hidden
+                rounded-lg
+                border
+                border-white/10
+                bg-black
+              "
+            >
               <img
                 src="/images/importation.jpg"
                 alt="Products sourced from international markets"
@@ -124,11 +269,30 @@ export function ImportationBanner() {
                 loading="lazy"
               />
 
-              {/* Scrim for readability */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
+              <div
+                className="
+                  absolute
+                  inset-0
+                  bg-gradient-to-t
+                  from-black/90
+                  via-black/25
+                  to-transparent
+                "
+              />
 
-              {/* Steps overlay */}
-              <div className="absolute inset-x-4 bottom-4 rounded-xl border border-slate-700 bg-slate-900/95 p-3 backdrop-blur-sm">
+              <div
+                className="
+                  absolute
+                  inset-x-4
+                  bottom-4
+                  rounded-md
+                  border
+                  border-white/10
+                  bg-black/75
+                  p-3
+                  backdrop-blur-sm
+                "
+              >
                 <ol className="space-y-2">
                   {FEATURES.map((feature, index) => {
                     const Icon = feature.icon;
@@ -138,8 +302,23 @@ export function ImportationBanner() {
                         key={feature.title}
                         className="flex items-center gap-3"
                       >
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-800 text-slate-200">
-                          <Icon size={14} />
+                        <span
+                          className="
+                            flex
+                            h-7
+                            w-7
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-full
+                            bg-white/10
+                            text-[var(--brand-300)]
+                          "
+                        >
+                          <Icon
+                            size={14}
+                            strokeWidth={1.8}
+                          />
                         </span>
 
                         <div className="min-w-0 flex-1">
@@ -147,7 +326,7 @@ export function ImportationBanner() {
                             {feature.title}
                           </p>
 
-                          <p className="truncate text-[11px] text-slate-400">
+                          <p className="truncate text-[11px] text-white/45">
                             Step {index + 1}
                           </p>
                         </div>
@@ -158,9 +337,29 @@ export function ImportationBanner() {
               </div>
             </div>
 
-            {/* Floating badge */}
-            <div className="absolute -top-5 -right-5 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 shadow-xl shadow-black/50">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            <div
+              className="
+                absolute
+                -right-5
+                -top-5
+                rounded-md
+                border
+                border-white/10
+                bg-[var(--surface-dark)]
+                px-4
+                py-3
+                shadow-lg
+              "
+            >
+              <p
+                className="
+                  text-[10px]
+                  font-semibold
+                  uppercase
+                  tracking-[0.18em]
+                  text-white/45
+                "
+              >
                 Sourced for you
               </p>
 

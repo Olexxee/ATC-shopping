@@ -1,15 +1,11 @@
 import { SlidersHorizontal } from "lucide-react";
-
-import {
-  PRODUCT_SORT_OPTIONS,
-} from "../../features/products/products-listing.utils";
-
-type ProductSort = (typeof PRODUCT_SORT_OPTIONS)[number]["value"];
+import type { ProductSortValue } from "../../features/products/products-listing.utils";
+import { ProductSort } from "./ProductSort";
 
 interface ProductToolbarProps {
   total: number;
-  sort: ProductSort;
-  onSortChange: (sort: ProductSort) => void;
+  sort: ProductSortValue;
+  onSortChange: (sort: ProductSortValue) => void;
   onFilterClick?: () => void;
 }
 
@@ -20,42 +16,57 @@ export function ProductToolbar({
   onFilterClick,
 }: ProductToolbarProps) {
   return (
-    <div className="flex items-center justify-between gap-4 border-y border-neutral-200 py-4">
-      <div>
-        <p className="text-sm text-neutral-500">
-          {total.toLocaleString()} products
-        </p>
-      </div>
+    <div
+      className="
+        flex
+        items-center
+        justify-between
+        gap-3
+        border-y
+        border-[var(--border)]
+        py-3
+        sm:py-4
+      "
+    >
+      <p className="text-sm text-[var(--text-secondary)]">
+        {total.toLocaleString()} products
+      </p>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {onFilterClick && (
           <button
             type="button"
             onClick={onFilterClick}
-            className="inline-flex items-center gap-2 rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-900 hover:border-neutral-400"
+            className="
+              inline-flex
+              h-10
+              items-center
+              justify-center
+              gap-2
+              rounded-lg
+              border
+              border-[var(--border)]
+              bg-white
+              px-3
+              text-sm
+              font-medium
+              text-[var(--text-primary)]
+              transition-colors
+              duration-200
+              hover:border-[var(--border-strong)]
+              hover:bg-[var(--surface)]
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-[var(--brand)]
+              focus-visible:ring-offset-2
+            "
           >
-            <SlidersHorizontal size={16} />
-            Filter
+            <SlidersHorizontal size={16} strokeWidth={1.8} />
+            <span>Filter</span>
           </button>
         )}
 
-        <label className="flex items-center gap-2 text-sm">
-          <span className="hidden text-neutral-500 sm:inline">Sort</span>
-
-          <select
-            value={sort}
-            onChange={(event) =>
-              onSortChange(event.target.value as ProductSort)
-            }
-            className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium outline-none focus:border-neutral-950"
-          >
-            {PRODUCT_SORT_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ProductSort value={sort} onChange={onSortChange} />
       </div>
     </div>
   );

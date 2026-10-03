@@ -1,12 +1,12 @@
-import type { HTMLAttributes } from "react";
-
-interface SectionProps extends HTMLAttributes<HTMLElement> {
+export function Section({
+  children,
+  className = "",
+}: {
   children: React.ReactNode;
-}
-
-export function Section({ children, className = "", ...props }: SectionProps) {
+  className?: string;
+}) {
   return (
-    <section className={`py-16 md:py-20 lg:py-24 ${className}`} {...props}>
+    <section className={`py-12 md:py-16 lg:py-20 ${className}`}>
       {children}
     </section>
   );

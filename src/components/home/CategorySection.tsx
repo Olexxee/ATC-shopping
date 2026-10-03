@@ -1,8 +1,8 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { CategoryCard } from "../category/CategoryCard";
 import { Container } from "../layout/Container";
 import { Section } from "../layout/Section";
-import { CategoryCard } from "../category/CategoryCard";
 import type { CategoryCardData } from "../../types/category-ui";
 
 
@@ -10,7 +10,9 @@ interface CategorySectionProps {
   categories: CategoryCardData[];
 }
 
-export function CategorySection({ categories }: CategorySectionProps) {
+export function CategorySection({
+  categories,
+}: CategorySectionProps) {
   if (!categories.length) return null;
 
   return (
@@ -18,11 +20,28 @@ export function CategorySection({ categories }: CategorySectionProps) {
       <Container>
         <div className="flex items-end justify-between gap-6">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+            <p
+              className="
+                text-xs
+                font-semibold
+                uppercase
+                tracking-[0.2em]
+                text-[var(--text-muted)]
+              "
+            >
               Explore
             </p>
 
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-950 sm:text-3xl">
+            <h2
+              className="
+                mt-2
+                text-2xl
+                font-semibold
+                tracking-tight
+                text-[var(--text-primary)]
+                sm:text-3xl
+              "
+            >
               Shop by category
             </h2>
           </div>
@@ -35,20 +54,40 @@ export function CategorySection({ categories }: CategorySectionProps) {
               gap-2
               text-sm
               font-medium
-              text-neutral-700
+              text-[var(--text-secondary)]
               transition-colors
-              hover:text-neutral-950
+              duration-200
+              hover:text-[var(--brand)]
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-[var(--brand)]
+              focus-visible:ring-offset-2
               sm:flex
             "
           >
             View all
-            <ArrowRight size={16} />
+            <ArrowRight
+              size={16}
+              strokeWidth={1.8}
+            />
           </Link>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div
+          className="
+            mt-8
+            grid
+            grid-cols-2
+            gap-4
+            sm:grid-cols-3
+            lg:grid-cols-4
+          "
+        >
           {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} />
+            <CategoryCard
+              key={category.id}
+              category={category}
+            />
           ))}
         </div>
 
@@ -62,12 +101,22 @@ export function CategorySection({ categories }: CategorySectionProps) {
             gap-2
             text-sm
             font-medium
-            text-neutral-700
+            text-[var(--text-secondary)]
+            transition-colors
+            duration-200
+            hover:text-[var(--brand)]
+            focus-visible:outline-none
+            focus-visible:ring-2
+            focus-visible:ring-[var(--brand)]
+            focus-visible:ring-offset-2
             sm:hidden
           "
         >
           View all categories
-          <ArrowRight size={16} />
+          <ArrowRight
+            size={16}
+            strokeWidth={1.8}
+          />
         </Link>
       </Container>
     </Section>

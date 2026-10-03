@@ -16,25 +16,33 @@ export function ProductSort({
 }: ProductSortProps) {
   return (
     <label className={`flex items-center gap-3 ${className}`}>
-      <span className="hidden text-sm text-neutral-500 sm:inline">Sort by</span>
+      <span className="hidden text-sm text-[var(--text-muted)] sm:inline">
+        Sort by
+      </span>
 
       <select
         value={value}
         onChange={(event) => onChange(event.target.value as ProductSortValue)}
         className="
           h-10
-          rounded-full
+          min-w-36
+          cursor-pointer
+          appearance-none
+          rounded-lg
           border
-          border-neutral-200
+          border-[var(--border)]
           bg-white
-          px-4
+          px-3
           text-sm
           font-medium
-          text-neutral-900
+          text-[var(--text-primary)]
           outline-none
-          transition
-          hover:border-neutral-400
-          focus:border-neutral-900
+          transition-colors
+          duration-200
+          hover:border-[var(--border-strong)]
+          focus:border-[var(--brand)]
+          focus:ring-2
+          focus:ring-[var(--brand-soft)]
         "
       >
         {PRODUCT_SORT_OPTIONS.map((option) => (

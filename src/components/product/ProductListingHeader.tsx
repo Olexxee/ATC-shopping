@@ -8,16 +8,37 @@ export function ProductListingHeader({
   description,
 }: ProductListingHeaderProps) {
   return (
-    <header className="py-10 sm:py-14">
-      <h1 className="text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl">
-        {title}
-      </h1>
+    <header className="pb-8 pt-10 sm:pb-10 sm:pt-14 lg:pb-12 lg:pt-16">
+      <div className="max-w-3xl">
+        <h1
+          className="
+            text-3xl
+            font-semibold
+            leading-tight
+            tracking-[-0.02em]
+            text-[var(--text-primary)]
+            sm:text-4xl
+            lg:text-5xl
+          "
+        >
+          {title}
+        </h1>
 
-      {description && (
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-500 sm:text-base">
-          {description}
-        </p>
-      )}
+        {description && (
+          <p
+            className="
+              mt-4
+              max-w-2xl
+              text-sm
+              leading-relaxed
+              text-[var(--text-secondary)]
+              sm:text-base
+            "
+          >
+            {description}
+          </p>
+        )}
+      </div>
     </header>
   );
 }

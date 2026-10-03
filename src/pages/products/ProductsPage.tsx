@@ -9,7 +9,7 @@ import { useInfiniteProducts } from "../../features/products/products.queries";
 import { useProductDiscovery } from "../../features/products/useProductDiscovery";
 
 export function ProductsPage() {
-  const { state, params, setSort, clearFilters } = useProductDiscovery();
+  const { state, params, setSort } = useProductDiscovery();
 
   const productsQuery = useInfiniteProducts(params);
 
@@ -21,34 +21,39 @@ export function ProductsPage() {
   const totalCount = productsQuery.data?.pages[0]?.pagination?.total ?? 0;
 
   const pageTitle = useMemo(() => {
-    if (state.search) return `Search results for "${state.search}"`;
-    if (state.isFeatured) return "Featured products";
-    if (state.isNew) return "New arrivals";
-    if (state.isBestSeller) return "Best sellers";
-    return "All products";
-  }, [state.search, state.isFeatured, state.isNew, state.isBestSeller]);
+    if (state.search) {
+      return `Search results for "${state.search}"`;
+    }
 
-  const hasFilters =
-    Boolean(state.categoryId) ||
-    Boolean(state.brandId) ||
-    Boolean(state.collectionId) ||
-    Boolean(state.isFeatured) ||
-    Boolean(state.isNew) ||
-    Boolean(state.isBestSeller) ||
-    state.minPrice !== undefined ||
-    state.maxPrice !== undefined;
+    if (state.isFeatured) {
+      return "Featured products";
+    }
+
+    if (state.isNew) {
+      return "New arrivals";
+    }
+
+    if (state.isBestSeller) {
+      return "Best sellers";
+    }
+
+    return "All products";
+  }, [
+    state.search,
+    state.isFeatured,
+    state.isNew,
+    state.isBestSeller,
+  ]);
 
   return (
     <main className="min-h-screen bg-white">
-      <div className="mx-auto w-full max-w-[1440px] px-6 py-12 sm:px-8 lg:px-12">
+      <div className="mx-auto w-full max-w-[1440px] px-6 py-10 sm:px-8 sm:py-14 lg:px-12 lg:py-16">
         <ProductListingHeader
           title={pageTitle}
           description={
-            productsQuery.isLoading
-              ? undefined
-              : `${totalCount.toLocaleString()} ${
-                  totalCount === 1 ? "product" : "products"
-                }`
+            state.search
+              ? "Explore products matching your search."
+              : "Explore the full Keplex collection."
           }
         />
 
@@ -60,7 +65,6 @@ export function ProductsPage() {
             onFiltersOpen={() => {
               // Mobile filters will be wired here.
             }}
-            onClearFilters={hasFilters ? clearFilters : undefined}
             showFilterButton
           />
         </div>
@@ -69,15 +73,34 @@ export function ProductsPage() {
           {productsQuery.isLoading ? (
             <ProductGridSkeleton count={8} />
           ) : productsQuery.isError ? (
-            <div className="py-12 text-center">
-              <p className="text-sm text-red-600">Failed to load products.</p>
-              <button
-                type="button"
-                onClick={() => productsQuery.refetch()}
-                className="mt-3 text-sm font-medium underline"
-              >
-                Try again
-              </button>
+            <div className="flex min-h-[360px] items-center justify-center px-6 text-center">
+              <div>
+                <p className="text-sm font-medium text-[var(--error)]">
+                  Failed to load products.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => productsQuery.refetch()}
+                  className="
+                    mt-3
+                    text-sm
+                    font-medium
+                    text-[var(--text-primary)]
+                    underline
+                    underline-offset-4
+                    transition-colors
+                    duration-200
+                    hover:text-[var(--brand)]
+                    focus-visible:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-[var(--brand)]
+                    focus-visible:ring-offset-2
+                  "
+                >
+                  Try again
+                </button>
+              </div>
             </div>
           ) : products.length > 0 ? (
             <ProductGrid products={products} />
