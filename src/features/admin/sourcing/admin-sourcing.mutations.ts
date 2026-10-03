@@ -92,7 +92,6 @@ export function useUpdateAdminSourcingResponseStatus() {
   return useMutation({
     mutationFn: ({
       responseId,
-      requestId,
       status,
     }: {
       responseId: string;

@@ -1018,7 +1018,5 @@ function CheckoutMessage({
     </main>
   );
 }
-    function handleFullPayment() {
-      throw new Error("Function not implemented.");
-    }
+
 

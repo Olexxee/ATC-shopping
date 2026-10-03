@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Ban } from "lucide-react";
 import {
   useAdminFlexPayPayments,
@@ -26,7 +26,6 @@ const date = (value: string | null) => {
 
 export function AdminFlexPayDetailPage() {
   const { planId } = useParams();
-  const navigate = useNavigate();
 
   const planQuery = useAdminFlexPayPlan(planId);
 
