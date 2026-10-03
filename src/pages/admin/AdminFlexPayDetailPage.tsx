@@ -26,7 +26,6 @@ const date = (value: string | null) => {
 
 export function AdminFlexPayDetailPage() {
   const { planId } = useParams();
-  const navigate = useNavigate();
 
   const planQuery = useAdminFlexPayPlan(planId);
 
