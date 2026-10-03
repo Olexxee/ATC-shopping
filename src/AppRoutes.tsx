@@ -33,6 +33,7 @@ import { ShippingPage } from "./pages/shipping/ShippingPage";
 import CartPage from "./pages/Cart/CartPage";
 import WishlistPage from "./pages/wishlist/WishlistPage";
 import CheckoutPage from "./pages/checkout/CheckoutPage";
+import { SmartShoppingPage } from "./pages/smartShopping/SmartShoppingPage";
 
 import InstallmentsPage from "./pages/account/InstallmentsPage";
 import InstallmentDetailPage from "./pages/account/InstallmentDetailPage";
@@ -131,7 +132,8 @@ export function AppRoutes() {
       <Route path="/brands" element={<BrandsPage />} />
       <Route path="/brands/:slug" element={<BrandPage />} />
       <Route path="/shipping" element={<ShippingPage />} />
-
+      <Route path="/smart-shopping" element={<SmartShoppingPage />} />
+      
       {/* ============================================================
        * PROTECTED STOREFRONT
        * ========================================================== */}
