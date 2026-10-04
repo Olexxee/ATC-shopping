@@ -11,6 +11,8 @@ import {
 import { useCart } from "../../features/cart/cart.queries";
 import { useCartStore } from "../../features/cart/cart.store";
 
+
+
 export default function CartPage() {
   const navigate = useNavigate();
 
@@ -31,75 +33,111 @@ export default function CartPage() {
 
   const [actionError, setActionError] = useState("");
 
-  /*
-   * Hydrate Zustand from the server cart.
-   */
   useEffect(() => {
     if (serverCart) {
       setCart(serverCart);
     }
   }, [serverCart, setCart]);
 
-  /*
-   * While React Query is loading for the first time,
-   * there is no local cart yet.
-   */
   if (isCartLoading && !cart) {
     return (
-      <div className="min-h-[60vh] px-4 py-12">
-        <div className="mx-auto max-w-7xl">
+      <main className="min-h-screen bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
           <div className="animate-pulse">
-            <div className="h-8 w-32 rounded bg-gray-200" />
+            <div className="h-4 w-28 rounded bg-[var(--surface)]" />
 
-            <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
-              <div className="rounded-2xl border border-gray-200 bg-white p-6">
-                <div className="space-y-6">
+            <div className="mt-5 h-9 w-40 rounded bg-[var(--surface)]" />
+
+            <div className="mt-2 h-4 w-24 rounded bg-[var(--surface)]" />
+
+            <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-16">
+              <div>
+                <div className="border-y border-[var(--border)]">
                   {[1, 2, 3].map((item) => (
-                    <div key={item} className="flex gap-4">
-                      <div className="h-28 w-28 rounded-lg bg-gray-200" />
+                    <div
+                      key={item}
+                      className="flex gap-4 border-b border-[var(--border)] py-6 last:border-b-0"
+                    >
+                      <div className="h-24 w-24 shrink-0 rounded-lg bg-[var(--surface)] sm:h-32 sm:w-32" />
 
                       <div className="flex-1 space-y-3">
-                        <div className="h-4 w-1/2 rounded bg-gray-200" />
-                        <div className="h-3 w-1/3 rounded bg-gray-200" />
-                        <div className="h-9 w-28 rounded bg-gray-200" />
+                        <div className="h-4 w-1/2 rounded bg-[var(--surface)]" />
+                        <div className="h-3 w-1/3 rounded bg-[var(--surface)]" />
+                        <div className="h-3 w-1/4 rounded bg-[var(--surface)]" />
+                        <div className="h-9 w-28 rounded bg-[var(--surface)]" />
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="h-72 rounded-2xl bg-gray-200" />
+              <div className="space-y-5">
+                <div className="h-6 w-32 rounded bg-[var(--surface)]" />
+
+                <div className="space-y-4">
+                  <div className="h-4 rounded bg-[var(--surface)]" />
+                  <div className="h-4 rounded bg-[var(--surface)]" />
+                  <div className="h-4 rounded bg-[var(--surface)]" />
+                </div>
+
+                <div className="border-t border-[var(--border)] pt-5">
+                  <div className="h-5 rounded bg-[var(--surface)]" />
+                </div>
+
+                <div className="h-11 rounded-md bg-[var(--surface)]" />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   if (isError && !cart) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
-          <ShoppingBag className="h-7 w-7 text-red-500" />
-        </div>
+      <main className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
+        <ShoppingBag
+          size={40}
+          strokeWidth={1.4}
+          className="text-[var(--text-muted)]"
+        />
 
-        <h1 className="mt-5 text-xl font-semibold text-gray-900">
+        <h1 className="mt-5 text-xl font-semibold text-[var(--text-primary)]">
           Unable to load your cart
         </h1>
 
-        <p className="mt-2 max-w-md text-sm text-gray-500">
-          We couldn't retrieve your cart right now. Please try again.
+        <p className="mt-2 max-w-md text-sm leading-6 text-[var(--text-secondary)]">
+          We couldn&apos;t retrieve your cart right now. Please try again.
         </p>
 
         <button
           type="button"
           onClick={() => refetch()}
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800"
+          className="
+            mt-6
+            inline-flex
+            h-10
+            items-center
+            gap-2
+            rounded-md
+            bg-[var(--brand)]
+            px-5
+            text-sm
+            font-semibold
+            text-white
+            transition-colors
+            duration-200
+            hover:bg-[var(--brand-hover)]
+            focus-visible:outline-none
+            focus-visible:ring-2
+            focus-visible:ring-[var(--brand)]
+            focus-visible:ring-offset-2
+          "
         >
-          <RefreshCw className="h-4 w-4" />
+          <RefreshCw size={16} strokeWidth={1.8} />
           Try again
         </button>
-      </div>
+      </main>
     );
   }
 
@@ -156,56 +194,138 @@ export default function CartPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Link
-              to="/products"
-              className="inline-flex items-center gap-2 text-sm text-gray-500 no-underline transition hover:text-gray-900"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Continue shopping
-            </Link>
-
-            <h1 className="mt-4 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-              Shopping Cart
-            </h1>
-
-            <p className="mt-1 text-sm text-gray-500">
-              {cart.totalItems} {cart.totalItems === 1 ? "item" : "items"} in
-              your cart
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleClearCart}
-            disabled={clearMutation.isPending}
-            className="self-start rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition hover:border-red-300 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50 sm:self-auto"
+    <main className="min-h-screen bg-white">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <header>
+          <Link
+            to="/products"
+            className="
+              inline-flex
+              items-center
+              gap-2
+              text-sm
+              text-[var(--text-secondary)]
+              no-underline
+              transition-colors
+              duration-200
+              hover:text-[var(--brand)]
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-[var(--brand)]
+              focus-visible:ring-offset-2
+            "
           >
-            {clearMutation.isPending ? "Clearing..." : "Clear cart"}
-          </button>
-        </div>
+            <ArrowLeft size={16} strokeWidth={1.8} />
+            Continue shopping
+          </Link>
+
+          <div className="mt-6 flex items-end justify-between gap-6">
+            <div>
+              <h1
+                className="
+                  text-3xl
+                  font-semibold
+                  tracking-tight
+                  text-[var(--text-primary)]
+                  sm:text-4xl
+                "
+              >
+                Shopping cart
+              </h1>
+
+              <p className="mt-2 text-sm text-[var(--text-muted)]">
+                {cart.totalItems}{" "}
+                {cart.totalItems === 1 ? "item" : "items"} in your cart
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleClearCart}
+              disabled={clearMutation.isPending}
+              className="
+                hidden
+                text-sm
+                font-medium
+                text-[var(--text-muted)]
+                transition-colors
+                duration-200
+                hover:text-[var(--error)]
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-[var(--brand)]
+                focus-visible:ring-offset-2
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+                sm:block
+              "
+            >
+              {clearMutation.isPending ? "Clearing..." : "Clear cart"}
+            </button>
+          </div>
+        </header>
 
         {actionError && (
           <div
             role="alert"
-            className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="
+              mt-6
+              border-l-2
+              border-[var(--error)]
+              bg-red-50
+              px-4
+              py-3
+              text-sm
+              text-[var(--error)]
+            "
           >
             {actionError}
           </div>
         )}
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-            <div className="mb-2 flex items-center gap-2">
-              <ShoppingBag className="h-5 w-5 text-gray-700" />
+        <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-16">
+          <section aria-labelledby="cart-items-heading">
+            <div className="flex items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
+              <div className="flex items-center gap-2">
+                <ShoppingBag
+                  size={18}
+                  strokeWidth={1.8}
+                  className="text-[var(--text-secondary)]"
+                />
 
-              <h2 className="font-semibold text-gray-900">Cart items</h2>
+                <h2
+                  id="cart-items-heading"
+                  className="text-sm font-semibold text-[var(--text-primary)]"
+                >
+                  Cart items
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleClearCart}
+                disabled={clearMutation.isPending}
+                className="
+                  text-xs
+                  font-medium
+                  text-[var(--text-muted)]
+                  transition-colors
+                  duration-200
+                  hover:text-[var(--error)]
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-[var(--brand)]
+                  focus-visible:ring-offset-2
+                  sm:hidden
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                "
+              >
+                {clearMutation.isPending ? "Clearing..." : "Clear cart"}
+              </button>
             </div>
 
-            <div className="mt-4">
+            <div className="mt-2">
               {cart.items.map((item) => (
                 <CartItemCard
                   key={item.id}
@@ -222,9 +342,11 @@ export default function CartPage() {
             </div>
           </section>
 
-          <aside className="lg:sticky lg:top-6 lg:self-start">
-            <CartSummary cart={cart} onCheckout={handleCheckout} />
-          </aside>
+          <CartSummary
+            cart={cart}
+            onCheckout={handleCheckout}
+            isCheckingOut={false}
+          />
         </div>
       </div>
     </main>
